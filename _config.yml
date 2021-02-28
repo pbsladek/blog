@@ -5,7 +5,7 @@ theme: jekyll-text-theme
 text_skin: default
 highlight_theme: default
 url     : https://pbsladek.github.io/blog/
-baseurl : ""
+baseurl : https://pbsladek.github.io/blog/
 title   : pbsladek
 description: >
   pbsladek blog
