@@ -37,8 +37,8 @@ repository_tree: main
 ## => Paths
 ##############################
 paths:
-  root    : "/"
-  home    : "/"
+  root    : "/blog"
+  home    : "/blog"
   archive : "/archive.html"
   rss     : "/feed.xml"
 
