@@ -4,7 +4,7 @@ theme: jekyll-text-theme
 ##############################
 text_skin: default
 highlight_theme: default
-url     : https://pbsladek.github.io/
+url     : https://pbsladek.github.io/blog/
 baseurl : ""
 title   : pbsladek
 description: >
@@ -20,7 +20,7 @@ timezone: America/Los_Angeles
 author:
   type      : person
   name      : Paul Sladek
-  url       : https://pbsladek.github.io/
+  url       : https://pbsladek.github.io/blog/
   avatar    : assets/images/avatar-chess-paul.jpg
   bio: >
     pbsladek blog
