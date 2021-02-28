@@ -20,7 +20,7 @@ timezone: America/Los_Angeles
 author:
   type      : person
   name      : Paul Sladek
-  url       : https://pbsladek.github.io/blog
+  url       : https://pbsladek.github.io/
   avatar    : assets/images/avatar-chess-paul.jpg
   bio: >
     pbsladek blog
