@@ -13,7 +13,7 @@ Uses [Github Pages](https://pages.github.com/) and [jglovier/resume-template](ht
 ## Install Ruby
 
 ```bash
-# Install ruby with openssl@3 using chruby to manage versions
+# Install ruby with openssl@3 using chruby to manage versions for M1 mac
 ruby-install ruby -- --with-openssl-dir=$(brew --prefix openssl@3)
 
 # Verify Install
