@@ -26,11 +26,11 @@ titles:
 key: page-about
 ---
 
-Currently, I'm employed as a DevOps Engr at WarnerMedia.
+Currently, I'm employed as a DevOps Manager at Seekr.
 
 I’m flexible, practical and motivated. I enjoy solving difficult problems and working in a productive and diverse team environment.
 
-In my free time, I enjoy hiking with my partner and our uglies (🐶), motorcycles (f800gt), and chess.
+In my free time, I enjoy hiking with my dog Charlie (🐶), motorcycles, and chess.
 
 Thanks for taking an interest.
 
