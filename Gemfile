@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "4.0.4"
+ruby "3.3.0"
 
 gem "jekyll", "~> 4.4"
 gem "bigdecimal"

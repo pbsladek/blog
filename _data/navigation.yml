@@ -1,7 +1,13 @@
 main:
+  - title: Recent Posts
+    url: /
+  - title: Projects
+    url: /projects/
   - title: About
     url: /about/
   - title: Resume
     url: https://pbsladek.github.io/
   - title: Archive
     url: /archive/
+  - title: Tags
+    url: /tags/

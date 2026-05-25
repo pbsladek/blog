@@ -1,0 +1,206 @@
+:root {
+  --code-bg: #111827;
+  --code-surface: #0b1120;
+  --code-border: #334155;
+  --code-text: #e5e7eb;
+  --code-muted: #94a3b8;
+  --code-accent: #38bdf8;
+  --code-accent-strong: #7dd3fc;
+  --code-success: #86efac;
+  --code-shadow: rgba(0, 0, 0, 0.28);
+}
+
+.page__content .highlighter-rouge,
+.page__content .code-block {
+  position: relative;
+  margin: 1.5rem 0;
+  overflow: hidden;
+  border: 1px solid var(--code-border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  box-shadow: 0 12px 32px var(--code-shadow);
+}
+
+.page__content .highlighter-rouge .highlight,
+.page__content .code-block .highlight {
+  margin: 0;
+  background: transparent;
+}
+
+.page__content .highlighter-rouge pre,
+.page__content .code-block pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  color: var(--code-text);
+  background: var(--code-bg);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  tab-size: 2;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page__content .highlighter-rouge code,
+.page__content .code-block code {
+  color: inherit;
+  background: transparent;
+  white-space: pre;
+}
+
+.code-block__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2.4rem;
+  gap: 0.75rem;
+  padding: 0.45rem 0.6rem 0.45rem 0.8rem;
+  border-bottom: 1px solid var(--code-border);
+  background: var(--code-surface);
+}
+
+.code-block__language {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--code-muted);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.code-block__copy {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.8rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: var(--code-accent-strong);
+  background: #172033;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.code-block__copy:hover,
+.code-block__copy:focus {
+  border-color: var(--code-accent);
+  color: #e0f2fe;
+  outline: none;
+}
+
+.code-block__copy:focus-visible {
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+.code-block__copy.is-copied {
+  border-color: var(--code-success);
+  color: var(--code-success);
+}
+
+.page__content .highlighter-rouge .c,
+.page__content .highlighter-rouge .cm,
+.page__content .highlighter-rouge .c1,
+.code-block .c,
+.code-block .cm,
+.code-block .c1 {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.page__content .highlighter-rouge .k,
+.page__content .highlighter-rouge .kd,
+.page__content .highlighter-rouge .kn,
+.page__content .highlighter-rouge .nt,
+.code-block .k,
+.code-block .kd,
+.code-block .kn,
+.code-block .nt {
+  color: #7dd3fc;
+}
+
+.page__content .highlighter-rouge .s,
+.page__content .highlighter-rouge .s1,
+.page__content .highlighter-rouge .s2,
+.page__content .highlighter-rouge .se,
+.code-block .s,
+.code-block .s1,
+.code-block .s2,
+.code-block .se {
+  color: #bef264;
+}
+
+.page__content .highlighter-rouge .nv,
+.page__content .highlighter-rouge .vi,
+.page__content .highlighter-rouge .vc,
+.code-block .nv,
+.code-block .vi,
+.code-block .vc {
+  color: #fbbf24;
+}
+
+.page__content .highlighter-rouge .mi,
+.page__content .highlighter-rouge .mf,
+.page__content .highlighter-rouge .m,
+.code-block .mi,
+.code-block .mf,
+.code-block .m {
+  color: #c4b5fd;
+}
+
+.page__content .highlighter-rouge .nf,
+.page__content .highlighter-rouge .na,
+.page__content .highlighter-rouge .nb,
+.code-block .nf,
+.code-block .na,
+.code-block .nb {
+  color: #93c5fd;
+}
+
+.page__content .highlighter-rouge .o,
+.page__content .highlighter-rouge .p,
+.code-block .o,
+.code-block .p {
+  color: #cbd5e1;
+}
+
+.page__content :not(pre) > code {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 5px;
+  color: #dbeafe;
+  background: #172033;
+  font-size: 0.86em;
+}
+
+@media (max-width: 640px) {
+  .page__content .highlighter-rouge,
+  .page__content .code-block {
+    margin-right: -0.5rem;
+    margin-left: -0.5rem;
+    border-right-width: 0;
+    border-left-width: 0;
+    border-radius: 0;
+  }
+
+  .code-block__toolbar {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+  }
+
+  .page__content .highlighter-rouge pre,
+  .page__content .code-block pre {
+    padding: 0.85rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  .code-block__copy {
+    min-width: 3.5rem;
+  }
+}

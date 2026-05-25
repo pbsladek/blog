@@ -1,9 +1,9 @@
 theme: minimal-mistakes-jekyll
-minimal_mistakes_skin: default
+minimal_mistakes_skin: dark
 
 locale: en-US
 title: pbsladek
-name: Paul Baker Sladek
+name: pbsladek blog
 description: pbsladek blog
 url: https://pbsladek.github.io
 baseurl: /blog
@@ -18,9 +18,11 @@ paginate: 5
 paginate_path: /page:num/
 permalink: /:categories/:year/:month/:day/:title/
 
+sass:
+  quiet_deps: true
+
 author:
-  name: Paul Baker Sladek
-  bio: pbsladek blog
+  name: pbsladek blog
   location: United States
   links:
     - label: GitHub
