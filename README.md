@@ -1,21 +1,21 @@
 # pbsladek blog
 
-## Running locally
+Jekyll blog using the [Minimal Mistakes](https://github.com/mmistakes/minimal-mistakes) theme and GitHub Pages.
 
-To test locally, run the following in your terminal:
-
-1. `bundle install`
-2. `bundle exec jekyll serve`
-3. Open your browser to `localhost:4000`
-
-Uses [Github Pages](https://pages.github.com/) and [jglovier/resume-template](https://github.com/jglovier/resume-template)
-
-## Install Ruby
+## Running locally with Docker
 
 ```bash
-# Install ruby with openssl@3 using chruby to manage versions for M1 mac
-ruby-install ruby -- --with-openssl-dir=$(brew --prefix openssl@3)
-
-# Verify Install
-ruby -rrbconfig -e 'puts RbConfig::CONFIG["CXX"]'
+make dev
 ```
+
+Open `http://localhost:4100/`.
+
+`make dev` starts at port `4100` and automatically moves to the next open port if `4100` is already busy. LiveReload also uses the next open port starting at `35729`.
+
+## Build check
+
+```bash
+make test
+```
+
+Run `make help` for the full command list.

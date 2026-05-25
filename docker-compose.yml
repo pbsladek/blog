@@ -1,0 +1,20 @@
+services:
+  site:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        RUBY_VERSION: 4.0.4
+    command: sh -lc 'bundle exec jekyll serve --host 0.0.0.0 --port 4100 --baseurl "" --livereload --livereload-port "$${LIVERELOAD_PORT:-35729}" --force_polling'
+    ports:
+      - "${JEKYLL_PORT:-4100}:4100"
+      - "${LIVERELOAD_PORT:-35729}:${LIVERELOAD_PORT:-35729}"
+    volumes:
+      - .:/usr/src/app
+      - bundle:/bundle
+    environment:
+      JEKYLL_ENV: development
+      LIVERELOAD_PORT: "${LIVERELOAD_PORT:-35729}"
+
+volumes:
+  bundle:

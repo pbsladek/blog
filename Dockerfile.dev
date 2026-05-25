@@ -1,20 +1,19 @@
-FROM ruby:3.0
+ARG RUBY_VERSION=4.0.4
+FROM ruby:${RUBY_VERSION}
 
-# Set default locale for the environment
-ENV LC_ALL C.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
-
-# throw errors if Gemfile has been modified since Gemfile.lock
-RUN bundle config --global frozen 1
+ENV BUNDLE_PATH=/bundle \
+    BUNDLE_JOBS=4 \
+    BUNDLE_RETRY=3 \
+    JEKYLL_ENV=development \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
 
 WORKDIR /usr/src/app
 
-COPY Gemfile Gemfile.lock jekyll-text-theme.gemspec ./
-
-RUN bundle update --bundler
+COPY Gemfile Gemfile.lock ./
+RUN gem install rake -v "~> 13.3"
 RUN bundle install
 
-EXPOSE 4000
+EXPOSE 4100 35729
 
-CMD ["bundle", "exec", "jekyll", "help"]
+CMD ["bundle", "exec", "jekyll", "serve", "--host", "0.0.0.0", "--port", "4100", "--baseurl", "", "--livereload", "--livereload-port", "35729", "--force_polling"]
