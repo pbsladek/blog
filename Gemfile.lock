@@ -22,6 +22,7 @@ GEM
     ffi (1.17.4-arm-linux-gnu)
     ffi (1.17.4-arm-linux-musl)
     ffi (1.17.4-arm64-darwin)
+    ffi (1.17.4-x86_64-linux-gnu)
     forwardable-extended (2.6.0)
     google-protobuf (3.25.8)
     http_parser.rb (0.8.1)
@@ -101,6 +102,8 @@ GEM
       google-protobuf (>= 3.25, < 5.0)
     sass-embedded (1.77.5-arm64-darwin)
       google-protobuf (>= 3.25, < 5.0)
+    sass-embedded (1.77.5-x86_64-linux-gnu)
+      google-protobuf (>= 3.25, < 5.0)
     sawyer (0.9.3)
       addressable (>= 2.3.5)
       faraday (>= 0.17.3, < 3)
@@ -117,6 +120,7 @@ PLATFORMS
   arm-linux-musl
   arm-linux-musleabihf
   arm64-darwin-23
+  x86_64-linux
 
 DEPENDENCIES
   bigdecimal
@@ -145,6 +149,7 @@ CHECKSUMS
   ffi (1.17.4-arm-linux-gnu) sha256=d6dbddf7cb77bf955411af5f187a65b8cd378cb003c15c05697f5feee1cb1564
   ffi (1.17.4-arm-linux-musl) sha256=9d4838ded0465bef6e2426935f6bcc93134b6616785a84ffd2a3d82bc3cf6f95
   ffi (1.17.4-arm64-darwin) sha256=19071aaf1419251b0a46852abf960e77330a3b334d13a4ab51d58b31a937001b
+  ffi (1.17.4-x86_64-linux-gnu) sha256=9d3db14c2eae074b382fa9c083fe95aec6e0a1451da249eab096c34002bc752d
   forwardable-extended (2.6.0) sha256=1bec948c469bbddfadeb3bd90eb8c85f6e627a412a3e852acfd7eaedbac3ec97
   google-protobuf (3.25.8) sha256=102c8500502e224a5daa7447bdd2c458a25a6c7b0bf5d8496a559ada131952b7
   http_parser.rb (0.8.1) sha256=9ae8df145b39aa5398b2f90090d651c67bd8e2ebfe4507c966579f641e11097a
@@ -179,6 +184,7 @@ CHECKSUMS
   sass-embedded (1.77.5-arm-linux-gnueabihf) sha256=e0e067f06ea4bb001c7c2099d6f0980d1fad918b3ea182857563f6488f07ff65
   sass-embedded (1.77.5-arm-linux-musleabihf) sha256=ad2b7cf152d5a7195d57508d466ebce56cdcac5d3ef95f05fa62664eeb9a5eda
   sass-embedded (1.77.5-arm64-darwin) sha256=a6a524aefe8b181c55d5f11c26b2329a06e20de32180f18904fc8488b89bdb36
+  sass-embedded (1.77.5-x86_64-linux-gnu) sha256=3000a6b984ea746eac1f0c9a17400134fe76c3d41b33436262ac82b5d153d7b4
   sawyer (0.9.3) sha256=0d0f19298408047037638639fe62f4794483fb04320269169bd41af2bdcf5e41
   terminal-table (3.0.2) sha256=f951b6af5f3e00203fb290a669e0a85c5dd5b051b3b023392ccfd67ba5abae91
   unicode-display_width (2.6.0) sha256=12279874bba6d5e4d2728cef814b19197dbb10d7a7837a869bab65da943b7f5a
