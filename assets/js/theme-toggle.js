@@ -36,10 +36,38 @@
     return button;
   }
 
+  function mountToggle(button) {
+    var nav = document.querySelector(".greedy-nav");
+    var menuToggle = nav ? nav.querySelector(".greedy-nav__toggle") : null;
+
+    if (nav) {
+      button.classList.add("theme-toggle--nav");
+      nav.insertBefore(button, menuToggle || null);
+      return;
+    }
+
+    button.classList.add("theme-toggle--floating");
+    document.body.appendChild(button);
+  }
+
+  function notifyLayoutChange() {
+    var event;
+
+    if (typeof window.Event === "function") {
+      event = new Event("resize");
+    } else {
+      event = document.createEvent("UIEvents");
+      event.initUIEvent("resize", true, false, window, 0);
+    }
+
+    window.dispatchEvent(event);
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     var button = createToggle();
-    document.body.appendChild(button);
+    mountToggle(button);
     setTheme(button, storedTheme());
+    window.setTimeout(notifyLayoutChange, 0);
 
     button.addEventListener("click", function () {
       var nextTheme = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";

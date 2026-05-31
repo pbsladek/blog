@@ -246,9 +246,6 @@ html[data-theme="light"] .project-card {
 
 .reader-mode-toggle,
 .theme-toggle {
-  position: fixed;
-  right: 1rem;
-  z-index: 1000;
   display: inline-flex;
   align-items: center;
   gap: 0.42rem;
@@ -265,12 +262,38 @@ html[data-theme="light"] .project-card {
   cursor: pointer;
 }
 
+html[data-theme="light"] .reader-mode-toggle,
+html[data-theme="light"] .theme-toggle {
+  border-color: rgba(15, 107, 120, 0.35);
+  color: #0f5260;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.reader-mode-toggle,
+.theme-toggle--floating {
+  position: fixed;
+  right: 1rem;
+  z-index: 1000;
+}
+
 .reader-mode-toggle {
   bottom: 1rem;
 }
 
-.theme-toggle {
+.theme-toggle--floating {
   bottom: 4rem;
+}
+
+.theme-toggle--nav {
+  position: static;
+  flex: 0 0 auto;
+  margin-left: 0.5rem;
+  border-color: transparent;
+  border-radius: 6px;
+  color: var(--site-link);
+  background: transparent;
+  box-shadow: none;
 }
 
 .reader-mode-toggle:hover,
@@ -290,6 +313,48 @@ html[data-theme="light"] .project-card {
 .theme-toggle[aria-pressed="true"] {
   color: #0b1120;
   background: var(--site-link-hover);
+}
+
+html[data-theme="light"] .reader-mode-toggle[aria-pressed="true"],
+html[data-theme="light"] .theme-toggle[aria-pressed="true"] {
+  border-color: #0f6b78;
+  color: #ffffff;
+  background: #0f6b78;
+}
+
+html[data-theme="light"] .theme-toggle--nav[aria-pressed="true"] {
+  color: #0f6b78;
+  background: transparent;
+  box-shadow: none;
+}
+
+.theme-toggle--nav:hover,
+.theme-toggle--nav:focus,
+.theme-toggle--nav[aria-pressed="true"]:hover,
+.theme-toggle--nav[aria-pressed="true"]:focus {
+  border-color: transparent;
+  color: var(--site-link-hover);
+  background: rgba(140, 210, 213, 0.08);
+}
+
+html[data-theme="light"] .theme-toggle--nav,
+html[data-theme="light"] .theme-toggle--nav[aria-pressed="true"] {
+  border-color: transparent;
+  color: #0f6b78;
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-theme="light"] .theme-toggle--nav:hover,
+html[data-theme="light"] .theme-toggle--nav:focus,
+html[data-theme="light"] .theme-toggle--nav[aria-pressed="true"]:hover,
+html[data-theme="light"] .theme-toggle--nav[aria-pressed="true"]:focus {
+  color: #074e5a;
+  background: rgba(15, 107, 120, 0.08);
+}
+
+html[data-theme="light"] .theme-toggle--nav:focus-visible {
+  box-shadow: 0 0 0 4px var(--site-focus);
 }
 
 body.reader-mode {
@@ -371,18 +436,25 @@ body.reader-mode .page__content h3 {
   }
 
   .reader-mode-toggle,
-  .theme-toggle {
+  .theme-toggle--floating {
     right: 0.75rem;
     min-height: 2.25rem;
     padding: 0.3rem 0.62rem;
     font-size: 0.78rem;
   }
 
+  .theme-toggle--nav {
+    margin-left: 0.25rem;
+    min-height: 2.1rem;
+    padding: 0.3rem 0.58rem;
+    font-size: 0.76rem;
+  }
+
   .reader-mode-toggle {
     bottom: 0.75rem;
   }
 
-  .theme-toggle {
+  .theme-toggle--floating {
     bottom: 3.65rem;
   }
 

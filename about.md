@@ -5,11 +5,11 @@ permalink: /about/
 author_profile: true
 ---
 
-Currently, I'm employed as a DevOps Manager at Seekr.
+I'm Director, AI Platform and DevOps at Seekr, where I help build platforms that scale, pipelines that behave, and systems that mostly don't page anyone at 3 a.m.
 
-I’m flexible, practical and motivated. I enjoy solving difficult problems and working in a productive and diverse team environment.
+I'm motivated by practical problem-solving, teams that think before they build (and debug before they panic), and the daily challenge of making complexity feel simple.
 
-In my free time, I enjoy hiking with my dog Charlie (🐶), motorcycles, and chess.
+Outside of work, I hike with my dog Charlie (he sets the pace), ride motorcycles (mostly forward), and play chess (badly, but with conviction).
 
 Thanks for taking an interest.
 
