@@ -7,7 +7,7 @@ DOCKER_COMPOSE ?= docker compose
 
 .DEFAULT_GOAL := help
 
-.PHONY: help dev test shell stop clean docker-clean
+.PHONY: help dev test shell stop clean docker-clean tag
 
 help:
 	@printf "%s\n" "Blog local commands"
@@ -19,6 +19,9 @@ help:
 	@printf "%s\n" "  make stop         Stop Compose services"
 	@printf "%s\n" "  make clean        Remove Jekyll build output"
 	@printf "%s\n" "  make docker-clean Stop Compose services and remove generated output"
+	@printf "%s\n" ""
+	@printf "%s\n" "Release:"
+	@printf "%s\n" "  make tag TAG=vDD.MM.YYYY  Create and push an annotated deploy tag"
 
 dev:
 	@set -e ; \
@@ -43,3 +46,11 @@ clean:
 
 docker-clean: clean
 	$(DOCKER_COMPOSE) down --remove-orphans
+
+tag:
+	@test -n "$(TAG)" || { printf "%s\n" "Usage: make tag TAG=vDD.MM.YYYY"; exit 2; }
+	@printf "%s\n" "$(TAG)" | grep -Eq '^v(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.[0-9]{4}$$' || { printf "%s\n" "Invalid tag format: $(TAG). Expected vDD.MM.YYYY"; exit 2; }
+	@test -z "$$(git status --porcelain)" || { printf "%s\n" "Working tree is not clean; commit or stash changes before tagging."; git status --short; exit 2; }
+	@if git rev-parse -q --verify "refs/tags/$(TAG)" >/dev/null; then printf "%s\n" "Tag already exists: $(TAG)"; exit 2; fi
+	git tag -a "$(TAG)" -m "Release $(TAG)"
+	git push origin "$(TAG)"
