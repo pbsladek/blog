@@ -7,14 +7,14 @@ DOCKER_COMPOSE ?= docker compose
 
 .DEFAULT_GOAL := help
 
-.PHONY: help dev test shell stop clean docker-clean tag
+.PHONY: help dev build check-diagrams test shell stop clean docker-clean tag
 
 help:
 	@printf "%s\n" "Blog local commands"
 	@printf "%s\n" ""
 	@printf "%s\n" "Docker:"
 	@printf "%s\n" "  make dev          Serve with Docker Compose, starting at http://$(JEKYLL_HOST):$(JEKYLL_PORT)/"
-	@printf "%s\n" "  make test         Build the static site inside Docker"
+	@printf "%s\n" "  make test         Build the static site and run diagram regression checks"
 	@printf "%s\n" "  make shell        Open a shell in the dev container"
 	@printf "%s\n" "  make stop         Stop Compose services"
 	@printf "%s\n" "  make clean        Remove Jekyll build output"
@@ -32,8 +32,13 @@ dev:
 	printf "%s\n" "Docker LiveReload on http://$(JEKYLL_HOST):$$LR_PORT" ; \
 	JEKYLL_PORT=$$PORT LIVERELOAD_PORT=$$LR_PORT $(DOCKER_COMPOSE) up --build site
 
-test:
+build:
 	$(DOCKER_COMPOSE) run --rm site bundle exec jekyll build
+
+check-diagrams:
+	ruby tools/check-diagrams.rb
+
+test: build check-diagrams
 
 shell:
 	$(DOCKER_COMPOSE) run --rm site /bin/sh

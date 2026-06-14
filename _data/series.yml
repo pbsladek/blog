@@ -1,0 +1,7 @@
+vllm-inference:
+  title: vLLM Inference
+  posts:
+    - title: vLLM Inference 101
+      url: /2026/05/21/vllm-inference-101/
+    - title: Running vLLM in Kubernetes
+      url: /2026/06/14/vllm-kubernetes/

@@ -1,0 +1,25 @@
+{% if page.series -%}
+{% assign series = site.data.series[page.series] -%}
+{% if series -%}
+<nav class="post-series" aria-labelledby="post-series-title">
+<p class="post-series__label">Series</p>
+<h2 id="post-series-title" class="post-series__title">{{ series.title }}</h2>
+<ol class="post-series__list">
+{% for item in series.posts -%}
+{% assign is_current = false -%}
+{% if item.url == page.url -%}
+{% assign is_current = true -%}
+{% endif -%}
+<li class="post-series__item{% if is_current %} post-series__item--current{% endif %}">
+<span class="post-series__part">Part {{ forloop.index }}</span>
+{% if is_current -%}
+<span aria-current="page">{{ item.title }}</span>
+{% else -%}
+<a href="{{ item.url | relative_url }}">{{ item.title }}</a>
+{% endif -%}
+</li>
+{% endfor -%}
+</ol>
+</nav>
+{% endif -%}
+{% endif -%}

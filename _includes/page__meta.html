@@ -1,0 +1,50 @@
+{% assign locale = include.locale | default: site.locale %}
+{% assign document = post | default: page %}
+{% assign words = document.content | strip_html | number_of_words %}
+{% assign show_word_count = document.word_count | default: false %}
+
+{% if document.read_time or document.show_date or show_word_count %}
+  <p class="page__meta">
+    {% assign has_meta = false %}
+
+    {% if document.show_date and document.date %}
+      {% assign date = document.date %}
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        {% assign date_format = site.date_format | default: "%B %-d, %Y" %}
+        <time datetime="{{ date | date_to_xmlschema }}">{{ date | date: date_format }}</time>
+      </span>
+      {% assign has_meta = true %}
+    {% endif %}
+
+    {% if document.read_time %}
+      {% if has_meta %}
+        <span class="page__meta-sep"></span>
+      {% endif %}
+
+      {% assign words_per_minute = document.words_per_minute | default: site.words_per_minute | default: 200 %}
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        {% if words < words_per_minute %}
+          {{ site.data.ui-text[locale].less_than | default: "less than" }} 1 {{ site.data.ui-text[locale].minute_read | default: "minute read" }}
+        {% elsif words == words_per_minute %}
+          1 {{ site.data.ui-text[locale].minute_read | default: "minute read" }}
+        {% else %}
+          {{ words | divided_by: words_per_minute }} {{ site.data.ui-text[locale].minute_read | default: "minute read" }}
+        {% endif %}
+      </span>
+      {% assign has_meta = true %}
+    {% endif %}
+
+    {% if show_word_count %}
+      {% if has_meta %}
+        <span class="page__meta-sep"></span>
+      {% endif %}
+
+      <span class="page__meta-wordcount">
+        <i class="far fa-file-alt" aria-hidden="true"></i>
+        {{ words }} {% if words == 1 %}word{% else %}words{% endif %}
+      </span>
+    {% endif %}
+  </p>
+{% endif %}

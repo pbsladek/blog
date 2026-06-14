@@ -81,6 +81,7 @@ defaults:
       layout: single
       author_profile: true
       read_time: true
+      word_count: true
       comments: false
       share: false
       related: true

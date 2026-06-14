@@ -1,20 +1,76 @@
 ---
 title: vLLM Inference 101
-excerpt: A walkthrough of LLM inference, KV cache basics, PagedAttention, and running vLLM on Kubernetes.
+excerpt: A walkthrough of LLM inference, KV cache basics, PagedAttention, and local serving options.
 tags:
   - ai
   - inference
-  - kubernetes
   - vllm
+series: vllm-inference
 ---
 
-[vLLM](https://docs.vllm.ai/) is an inference engine for serving large language models. The practical version: it helps keep GPUs busy and avoids wasting a bunch of memory while requests come and go.
+[vLLM](https://docs.vllm.ai/) is an inference engine for serving large language models. It keeps GPUs busy and reduces memory waste while requests come and go.
 
-That memory part matters. Inference is not just "load model, ask question, get answer." The server has to tokenize input, run model forward passes, keep attention state around, batch users together, stream tokens back, and somehow not run out of GPU memory while everyone sends prompts of wildly different sizes.
+That memory part matters. Inference is not just "load model, ask question, get answer." The server has to tokenize input, run model forward passes, keep attention state around, batch users together, stream tokens back, and stay inside GPU memory while prompts vary in size.
 
 <!--more-->
 
-This is a 101 walkthrough. The goal is to make the moving parts less mysterious: what inference is doing, why the KV cache matters, how PagedAttention helps, and what this looks like when you run it in Kubernetes.
+We start with the serving path, then move through KV cache, PagedAttention, and local serving.
+
+{% include series-nav.html %}
+
+The serving path:
+
+<figure class="diagram diagram--flow" aria-labelledby="serving-path-diagram">
+  <figcaption id="serving-path-diagram" class="diagram__caption">vLLM serving path</figcaption>
+  <div class="diagram__pipeline">
+    <div class="diagram__node diagram__node--wide">Client request</div>
+    <div class="diagram__connector diagram__connector--down" aria-hidden="true"></div>
+    <div class="diagram__group diagram__service">
+      <div class="diagram__group-title">vLLM service</div>
+      <div class="diagram__stages">
+        <div class="diagram__node diagram__node--accent">
+          API server
+          <span class="diagram__note">HTTP request handling</span>
+        </div>
+        <div class="diagram__connector diagram__connector--down" aria-hidden="true"></div>
+        <div class="diagram__node">
+          Input processing
+          <span class="diagram__note">Tokenization happens here</span>
+        </div>
+        <div class="diagram__connector diagram__connector--down" aria-hidden="true"></div>
+        <div class="diagram__node">
+          Engine core
+          <span class="diagram__note">Scheduler and KV cache</span>
+        </div>
+        <div class="diagram__connector diagram__connector--down" aria-hidden="true"></div>
+        <div class="diagram__node">
+          GPU worker
+          <span class="diagram__note">Prefill and decode passes</span>
+        </div>
+      </div>
+    </div>
+    <div class="diagram__connector diagram__connector--down" aria-hidden="true"></div>
+    <div class="diagram__node diagram__node--wide">Stream response</div>
+  </div>
+</figure>
+
+The API request is the part users see. Tokenization is still inside the vLLM service, usually as part of input processing before the engine core schedules model work. The scheduler, KV cache, and decode loop are where the expensive serving decisions happen.
+
+## Quick terms
+
+| Term | Plain meaning |
+| --- | --- |
+| **Weight** | A learned number inside the model. Weights are loaded into GPU memory for serving. |
+| **Parameter** | A count of learned weights. A 7B model has roughly seven billion parameters. |
+| **Token** | A chunk of text after tokenization. Models read and generate tokens, not raw words. |
+| **Context length** | The maximum number of input plus output tokens a request can use. |
+| **Sequence** | One active request's token stream from the engine's point of view. |
+| **Batch** | Multiple sequences served together in one scheduler step. |
+| **Prefill** | The prompt-processing phase. It builds the attention state for the input tokens. |
+| **Decode** | The generation phase. It usually advances active requests one token at a time. |
+| **KV cache** | Per-request attention state stored so decode can reuse earlier keys and values. |
+| **TTFT** | Time to first token. How long the user waits before the response starts streaming. |
+| **Throughput** | How much work the system completes, usually measured in tokens per second. |
 
 ## Inference is the serving path
 
@@ -24,24 +80,38 @@ A model weight is one of the learned numbers inside the model. During training, 
 
 Weights are large because there are a lot of them, and each one takes space. A 7B parameter model has roughly seven billion learned values. If those values are stored as FP16 or BF16, that is about two bytes per weight, so the raw weights are already around 14 GB before you count runtime overhead. Bigger models add more layers, wider hidden dimensions, more attention heads, larger feed-forward blocks, and sometimes larger vocabularies. All of that means more learned numbers to store.
 
-Precision matters too. FP32 weights take about four bytes each, FP16/BF16 take about two, and 8-bit or 4-bit quantized weights take less. Quantization can make a model much easier to fit on a GPU, but it is a storage and math tradeoff, not free magic.
+Precision matters too. FP32 weights take about four bytes each, FP16/BF16 take about two, and 8-bit or 4-bit quantized weights take less. Quantization can make a model much easier to fit on a GPU, but it is a storage and math tradeoff.
+
+For serving, quantization is usually about fitting the model, increasing concurrency, or lowering cost. If the weights take less memory, you may have more room for KV cache and more active requests. That is the upside.
+
+The tradeoff is that quantization changes how the model is represented and sometimes how kernels run. AWQ, GPTQ, FP8, INT8, and INT4 are not interchangeable stickers. Measure output quality, TTFT, decode throughput, memory use, and hardware support before declaring victory. A smaller model that produces worse answers or runs on slow kernels is not automatically better.
 
 LoRA is a little different. Instead of changing every base weight, a LoRA adapter adds a smaller set of learned weights on top of the base model. That lets you adapt behavior without shipping a whole new copy of the model. The base weights are still the big thing you load; the LoRA weights are the small overlay you can attach when you need that variant.
 
-Autoregressive just means the model generates one token based on the tokens that came before it. It predicts "what comes next?", appends that token, then does it again. That is the usual shape for chat and text-generation models. Other model types do different jobs: an embedding model turns text into vectors, a classifier picks a label, and non-autoregressive generators try to produce output without that same one-token-at-a-time loop. Some encoder-decoder models still decode autoregressively, so this is more about the generation pattern than the model family name. vLLM can serve more than plain text generation, but this walkthrough is mostly about the autoregressive case because that is where prefill, decode, and KV cache behavior matter most.
+Autoregressive means the model generates one token based on the tokens that came before it. It predicts "what comes next?", appends that token, then does it again. That is the standard pattern for chat and text-generation models. Other model types do different jobs: an embedding model turns text into vectors, a classifier picks a label, and non-autoregressive generators try to produce output without that same one-token-at-a-time loop. Some encoder-decoder models still decode autoregressively, so this is about the generation pattern more than the model family name. vLLM can serve more than plain text generation, but prefill, decode, and KV cache behavior matter most in the autoregressive case.
 
-For an autoregressive language model, inference usually has two phases worth knowing:
+For an autoregressive language model, inference has two phases worth knowing:
 
 1. **Prefill** reads the prompt. The model processes the input tokens and builds the attention state it will need later.
 2. **Decode** generates new tokens, usually one at a time, while reusing the state from previous tokens.
 
-The model weights are big, but once they are loaded they mostly sit there. The request memory is the jumpy part. A short prompt asking for 20 tokens and a giant prompt asking for 2,000 tokens do not have the same shape. A good inference server has to deal with that without letting one chunky request drag down the whole batch.
+Those phases stress the server in different ways.
+
+Prefill is about prompt size. A huge prompt can burn a lot of compute before the user sees the first token. That is why long documents can make TTFT worse even if the answer is short.
+
+Decode is about active generation. Each step usually produces the next token for each running sequence, then does it again. This is where continuous batching matters: as some requests finish and new ones arrive, the engine tries to keep the GPU busy without forcing every request to start and stop at the same time.
+
+Throughput and latency are connected, but they are not the same goal. Throughput asks, "how many tokens can this system produce per second?" Latency asks, "how long does this user wait?" Larger batches can improve total tokens per second while making an individual request wait longer for its turn. Smaller batches can reduce latency for one user while wasting GPU capacity under load.
+
+That is why production tuning is not just "maximize tokens/sec." You usually pick a latency target, then increase batching and concurrency until TTFT, inter-token latency, and error rates stop being acceptable. The best setting is workload-specific: chat, summarization, code generation, and long-document analysis do not stress the server in the same way.
+
+The model weights are big, but once they are loaded they mostly sit there. Request memory changes with traffic. A short prompt asking for 20 tokens and a large prompt asking for 2,000 tokens do not have the same cost. A serving engine has to handle that without letting one large request drag down the whole batch.
 
 vLLM sits in that serving path. It exposes an HTTP server with OpenAI-compatible endpoints such as `/v1/completions`, `/v1/chat/completions`, and `/v1/responses`, and handles the engine work underneath: batching, scheduling, decoding, and KV cache management.
 
 ## KV cache basics
 
-A tensor is just a block of numbers with shape. A single number is a tiny tensor, a list of numbers is a vector, a grid of numbers is a matrix, and models usually deal with bigger stacks of these. GPUs are good at moving and multiplying tensors quickly, which is a large part of why they are useful for LLMs.
+A tensor is a block of numbers with shape. A single number is a tiny tensor, a list of numbers is a vector, a grid of numbers is a matrix, and models usually deal with bigger stacks of these. GPUs are good at moving and multiplying tensors quickly, which is a large part of why they are useful for LLMs.
 
 Transformer attention is the part of the model that lets each token look at other tokens for context. If the prompt is "the dog chased the ball because it was red," attention helps the model decide what "it" probably refers to. Under the hood, the model turns token representations into three sets of tensors: queries, keys, and values.
 
@@ -55,7 +125,7 @@ The model compares queries to keys to decide which values matter. That is not th
 
 During generation, recomputing keys and values for the whole prompt every time would be expensive. The KV cache stores them so decode can reuse them.
 
-At a high level:
+The short version:
 
 - **K** means key tensors.
 - **V** means value tensors.
@@ -65,14 +135,50 @@ At a high level:
 
 The cache is helpful because it makes token generation much cheaper than starting from scratch every time. It is also a bottleneck because long prompts, long outputs, larger batches, and lots of concurrent users all compete for the same GPU memory.
 
-A useful mental model:
+Mental model: model weights are mostly fixed memory; KV cache is dynamic per-request memory.
 
-```text
-model weights = mostly fixed memory
-KV cache      = dynamic per-request memory
-```
+A rough memory sketch looks like this:
 
-If the server cannot pack KV cache efficiently, it has to run smaller batches. Smaller batches usually mean lower throughput and worse GPU utilization. Nobody bought the expensive GPU so it could sit around politely waiting.
+<figure class="diagram" aria-labelledby="gpu-memory-diagram">
+  <figcaption id="gpu-memory-diagram" class="diagram__caption">GPU memory during serving</figcaption>
+  <div class="diagram__memory">
+    <div class="diagram__pool">GPU memory</div>
+    <div class="diagram__memory-items">
+      <div class="diagram__node diagram__node--accent">
+        Model weights
+        <span class="diagram__note">Mostly fixed after load</span>
+      </div>
+      <div class="diagram__node">
+        KV cache
+        <span class="diagram__note">Grows with active tokens</span>
+      </div>
+      <div class="diagram__node">
+        Runtime overhead
+        <span class="diagram__note">Kernels, buffers, server state</span>
+      </div>
+      <div class="diagram__node">
+        Safety margin
+        <span class="diagram__note">Fragmentation and headroom</span>
+      </div>
+    </div>
+  </div>
+</figure>
+
+Weights are the cover charge. KV cache is the tab that grows with traffic. More concurrent requests, longer prompts, longer outputs, and larger maximum context all increase the amount of active token state the server has to keep around.
+
+If the server cannot pack KV cache efficiently, it has to run smaller batches. Smaller batches usually mean lower throughput and worse GPU utilization.
+
+GPU memory pressure has symptoms:
+
+- Requests sit in the queue longer.
+- TTFT gets worse because requests wait for cache space.
+- Concurrency stops improving even when more HTTP requests arrive.
+- Long-context requests push out shorter work.
+- Pods hit OOM, restart, or become unhealthy.
+- Rollouts get unstable because warm pods need more memory than expected.
+- Operators lower `--max-model-len`, batch size, or concurrency to keep the service alive.
+
+If the dashboard says CPU is bored but users are waiting, look at GPU memory and the KV cache before blaming the web server.
 
 ## Why naive cache allocation hurts
 
@@ -98,13 +204,13 @@ That gives the serving layer a few nice properties:
 - It can waste less memory on uneven sequence lengths.
 - It can support sharing patterns used by more complex decoding strategies.
 
-That is the trick that made vLLM interesting: better KV cache packing means larger effective batches, which usually means better throughput at similar latency for many workloads.
+That is the key idea behind vLLM: better KV cache packing allows larger effective batches, which usually means better throughput at similar latency for many workloads.
 
 ## What vLLM adds around it
 
 PagedAttention is the memory idea. vLLM is the serving system wrapped around it.
 
-The pieces operators usually care about first are:
+Operators usually start with:
 
 - **OpenAI-compatible serving:** point existing clients at a vLLM base URL.
 - **Continuous batching:** serve active requests together as they arrive and finish at different times.
@@ -113,7 +219,7 @@ The pieces operators usually care about first are:
 - **Cache controls:** tune context length, GPU memory usage, and KV cache behavior.
 - **Observability hooks:** figure out whether the pain is tokens, memory, latency, or queueing.
 
-A request is not usually handled as "one thread owns one request until it is done." The HTTP layer accepts the request asynchronously, then hands it to the vLLM engine. The engine tracks requests as sequences, keeps them in waiting and running sets, and the scheduler decides which sequences get work in the next step.
+A request is not handled as "one thread owns one request until it is done." The HTTP layer accepts the request asynchronously, then hands it to the vLLM engine. The engine tracks requests as sequences, keeps them in waiting and running sets, and the scheduler decides which sequences get work in the next step.
 
 The GPU work is batched. During prefill, vLLM can process prompt tokens for one or more requests. During decode, it usually advances active requests token by token, batching multiple requests together when it can. So the unit of work is closer to "scheduled token and sequence work" than "thread per request." There are still CPU threads and processes around the server and workers, but the performance trick is scheduling and batching GPU work, not spinning up a dedicated thread for every user.
 
@@ -126,7 +232,7 @@ vllm serve openai/gpt-oss-20b \
   --dtype auto
 ```
 
-This is an OpenAI open-weight model. That distinction matters: vLLM serves model weights you can run in your own environment, not hosted API-only models.
+The example uses an OpenAI open-weight model. vLLM serves model weights you can run in your own environment, not hosted API-only models.
 
 Then call it like an OpenAI-style endpoint:
 
@@ -142,199 +248,81 @@ curl http://localhost:8000/v1/chat/completions \
   }'
 ```
 
-For `gpt-oss`, vLLM's guide points at `/v1/responses` as the better endpoint when you want the full reasoning/tool-use path. The chat completions call above is just the familiar "does the server answer?" version.
+Use `/v1/chat/completions` when you want the familiar chat API shape. Use `/v1/responses` when you want the newer response format, especially for reasoning controls and tool-oriented flows:
 
-For a real service, the interesting flags are usually not the first ones you type. They are the ones that decide capacity and failure behavior:
+```sh
+curl http://localhost:8000/v1/responses \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai/gpt-oss-20b",
+    "input": "Explain KV cache in one paragraph.",
+    "reasoning": {
+      "effort": "low"
+    },
+    "max_output_tokens": 120
+  }'
+```
+
+If `gpt-oss-20b` does not fit locally, or it fits but feels too slow, use a smaller model for the laptop version of the experiment.
+
+Simple starting points for local laptop runs:
+
+| Laptop memory | Try first | Model memory | If it feels slow |
+| --- | --- | --- | --- |
+| 16 GB | [`llama3.2:3b`](https://ollama.com/library/llama3.2) | ~2 GB | `llama3.2:1b` (~1.3 GB) |
+| 32 GB | [`gemma3:12b`](https://ollama.com/library/gemma3) or [`gpt-oss:20b`](https://ollama.com/library/gpt-oss) | ~8.1 GB / ~14 GB | `llama3.1:8b` (~4.9 GB) or `llama3.2:3b` (~2 GB) |
+| 48 GB | [`gemma3:27b`](https://ollama.com/library/gemma3) or `gpt-oss:20b` | ~17 GB / ~14 GB | `gemma3:12b` (~8.1 GB) |
+
+With Ollama:
+
+```sh
+ollama run gpt-oss:20b
+ollama run gemma3:27b
+ollama run gemma3:12b
+ollama run llama3.2
+ollama run llama3.2:1b
+```
+
+And Ollama can expose an OpenAI-compatible local endpoint:
+
+```sh
+curl http://localhost:11434/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3.2",
+    "messages": [
+      {"role": "user", "content": "Explain KV cache in one paragraph."}
+    ],
+    "max_tokens": 120
+  }'
+```
+
+OpenAI-compatible does not mean OpenAI is serving the request. It means the HTTP path and JSON shape look like the OpenAI API, so tools that know how to call `/v1/chat/completions` can often point at `http://localhost:11434/v1` with a local model name instead. Llama itself is just the model family; Ollama is the runtime providing the OpenAI-compatible endpoint.
+
+After the server starts, these flags are the ones that change capacity, memory use, and how the model is exposed:
 
 - `--max-model-len` controls the maximum context length the server will accept.
 - `--gpu-memory-utilization` controls how aggressively vLLM uses GPU memory.
 - `--tensor-parallel-size` spreads a model across multiple GPUs.
 - `--served-model-name` lets the API expose a stable model name even if the checkpoint path changes.
 
-The exact values depend on the model, GPU, traffic pattern, and latency target. Tune them from measurements, not vibes. Vibes are great for playlists, less great for capacity planning.
+Context length is the total token budget for a request: prompt tokens plus generated output tokens. A 20,000-token document with a 500-token answer is a very different request from a 50-token chat message with a 500-token answer. The long prompt has to be tokenized, run through prefill, and have its attention state stored before decode can stream the answer.
 
-## Running vLLM in Kubernetes
+Across multiple API calls, context is not one infinite memory pool. Each model turn still has to fit inside a context window. An agent keeps continuity by sending the relevant conversation history, tool results, files, plans, or summaries into the next request, whether that state is managed by the client or by an API layer. When that accumulated state gets too large, the agent has to compact it: summarize older details, drop irrelevant output, or move facts into some external store and retrieve only what matters. Compaction is not a serving trick; it is how the caller keeps the next prompt inside the model's context limit.
 
-Kubernetes does not magically make inference efficient. It gives you scheduling, rollouts, service discovery, secrets, health checks, and resource boundaries. vLLM still needs the right GPU, enough memory, model access, and sane limits.
+A larger `--max-model-len` tells the server to allow larger requests, but that capacity has to come from somewhere. Long prompts increase prefill work. Long prompts and long outputs both grow KV cache. Higher maximums increase the worst-case memory a request can consume, which can reduce practical concurrency or make admission/scheduling more constrained under load. Set the limit to the workload you actually need: support tickets, code snippets, and chat history do not need the same ceiling as full-document analysis.
 
-A minimal Kubernetes manifest looks like this:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: vllm-gpt-oss
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: vllm-gpt-oss
-  template:
-    metadata:
-      labels:
-        app: vllm-gpt-oss
-    spec:
-      containers:
-        - name: vllm
-          image: vllm/vllm-openai:latest
-          args:
-            - --model
-            - openai/gpt-oss-20b
-            - --host
-            - 0.0.0.0
-            - --port
-            - "8000"
-            - --dtype
-            - auto
-          ports:
-            - containerPort: 8000
-          # Optional: only needed if your model registry requires auth.
-          env:
-            - name: HUGGING_FACE_HUB_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: hf-token
-                  key: token
-          resources:
-            limits:
-              nvidia.com/gpu: "1"
-```
-
-Then expose it inside the cluster:
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: vllm-gpt-oss
-spec:
-  selector:
-    app: vllm-gpt-oss
-  ports:
-    - name: http
-      port: 80
-      targetPort: 8000
-```
-
-That is enough to see the pieces, but it is not a full production setup. For production, pin image tags, use GPU node selectors or runtime classes, set requests as well as limits, think through model download and warmup time, and decide how rollouts should behave when a pod takes minutes to become ready.
-
-## Using replicas without dropping requests
-
-Multiple replicas of the same model are useful when each replica has enough GPU capacity to serve real traffic. In practice that usually means one vLLM pod per GPU, all serving the same model name, behind one Service or router.
-
-One request is not split across those replicas. Kubernetes, an ingress, or a model router picks one ready pod for the HTTP request. That pod runs the full prefill, owns the KV cache for that request, generates the decode tokens, and streams the response back. If the pod dies halfway through, the request usually fails and a retry starts over on another pod.
-
-So replicas give you request-level parallelism: three pods can handle three different requests at the same time. They do not combine into one bigger brain for a single request. If you need one model instance to span multiple GPUs, that is tensor parallelism or pipeline parallelism inside the vLLM deployment, not Kubernetes replicas.
-
-The simple Kubernetes version is:
-
-```yaml
-spec:
-  replicas: 3
-  template:
-    spec:
-      terminationGracePeriodSeconds: 120
-      containers:
-        - name: vllm
-          startupProbe:
-            httpGet:
-              path: /health
-              port: 8000
-            periodSeconds: 10
-            failureThreshold: 60
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8000
-            periodSeconds: 10
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8000
-            periodSeconds: 30
-```
-
-Readiness is the important bit. A pod should not receive traffic just because the container process exists. It should receive traffic after the model is loaded and the server can answer. Otherwise Kubernetes can send requests to a pod that is still downloading weights, warming kernels, or generally getting its shoes on. The startup probe gives slow model loads time to finish before the liveness probe starts judging the container.
-
-A Kubernetes Service normally routes to ready endpoints, but it is still a pretty blunt load balancer. It does not know that one vLLM pod has a long queue, another is holding a huge KV cache, and a third is mostly idle. For light traffic, the basic Service can be fine. For serious traffic, use a model-aware router or gateway that can look at per-replica health and load.
-
-FastAPI is not the load balancer here. vLLM uses a FastAPI/Uvicorn server inside each pod to expose the OpenAI-compatible HTTP API. That pod-local API server accepts a request, hands it to the vLLM engine, and streams the result back. It does not decide which replica in the fleet should get the next request.
-
-For the fleet-level router, the usual progression is:
-
-- **Small setup:** Kubernetes Service or an ingress routes to ready pods. Simple, but mostly unaware of model load.
-- **Production setup:** use the vLLM production stack or vLLM Router so routing can consider model identity, replica health, pending/running requests, and cache-aware policies.
-- **Edge/API layer:** keep Envoy, NGINX, HAProxy, or a cloud load balancer at the edge for TLS, auth, rate limits, and basic traffic management. Let the model-aware router make the inference-specific decision behind it.
-
-So the shape is usually `client -> edge LB/ingress -> model-aware router -> one vLLM pod`.
-
-### What the router actually does
-
-The router is the traffic cop for the model fleet. It receives the OpenAI-style request, looks at the available vLLM workers, picks one worker, and forwards the request there. The selected worker still does the whole request. The router is not slicing one prompt across three pods.
-
-What makes it useful is that it can make a better choice than a plain Kubernetes Service. A normal Service mostly sees ready endpoints. A vLLM-aware router can use inference-specific signals:
-
-- Which replicas are healthy and registered.
-- Which model each replica serves.
-- How many requests are pending or running on each worker.
-- Whether a routing key, session, or repeated prompt prefix should stick to the same worker.
-- Whether a setup is using more advanced patterns like separate prefill and decode workers.
-
-The router gets this information from a few places. Some of it is config: static backends, model names, aliases, and routing policy can be passed directly or managed through the production stack. In Kubernetes mode, the router uses the Kubernetes API with a namespace and label selector to discover vLLM pods. For load and health, it tracks what it sees while proxying requests and can scrape engine stats/metrics from the workers on an interval. So the model-specific view is assembled from service discovery plus router config plus live worker stats. No crystal ball, thankfully.
-
-That helps with two common problems. First, it avoids sending new work to a replica that is already backed up while another one is open. Second, it can preserve locality when that matters, such as routing related requests back to the same worker to improve cache reuse. Plain round-robin does not know any of that. It just keeps dealing cards.
-
-The router also gives you a cleaner place to put inference-facing behavior: model aliases, endpoint discovery, health tracking, routing policy, and fleet metrics. Your edge ingress can stay focused on boring-but-important things like TLS, auth, and rate limits. The router handles the "which model worker should get this?" decision.
-
-To keep replicas useful:
-
-- Give every replica the same served model name so clients do not care which pod answered.
-- Use readiness probes so cold or broken pods are removed from the endpoint list.
-- Use graceful shutdown so in-flight streaming requests get time to finish during rollouts.
-- Set client and gateway timeouts long enough for streaming responses.
-- Add retry behavior carefully. Retrying a failed prefill is usually fine; retrying halfway through a streamed response can duplicate work or return weird user experience.
-- Watch vLLM `/metrics`, especially queue depth, time-to-first-token, token throughput, request errors, and GPU memory pressure.
-- Autoscale from inference signals, not plain CPU. CPU can look bored while the GPU is doing all the work.
-- Use a PodDisruptionBudget so maintenance does not drain too much serving capacity at once.
-
-The goal is not "three pods exist." The goal is "traffic is spread across three ready, healthy, not-overloaded replicas." Those are different things, because distributed systems enjoy technicalities.
-
-The official [vLLM production stack](https://docs.vllm.ai/en/stable/deployment/integrations/production-stack/) is a better starting point once you move past one pod and one model. It wraps upstream vLLM, deploys through Helm, and includes routing and observability patterns that become important quickly.
-
-## What to watch in production
-
-The questions are pretty practical:
-
-- Are requests waiting in a queue?
-- Is decode throughput high enough?
-- Is time-to-first-token acceptable?
-- Is GPU memory full because of weights, KV cache, or fragmentation?
-- Are long-context requests crowding out short ones?
-- Are rollouts causing cold-start latency spikes?
-- Are clients retrying and accidentally multiplying load?
-
-For Kubernetes specifically, also watch:
-
-- GPU node capacity and scheduling failures.
-- Model weight download time.
-- Persistent volume performance if weights are cached.
-- Readiness probes that only pass after the model is actually usable.
-- Pod disruption budgets for serving capacity.
-- Autoscaling signals that reflect inference pressure, not just CPU.
-
-LLM serving feels weird if you are coming from normal web services. For a typical API, CPU, request rate, and latency often tell you enough to start scaling. For an LLM server, CPU can look calm while the GPU is out of memory, the decode queue is backed up, or one long-context request is eating the KV cache. The expensive resources are GPU memory, GPU compute, and the scheduling policy that decides which tokens get generated next.
+The exact values depend on the model, GPU, traffic pattern, and latency target. Tune them from measurements.
 
 ## The takeaway
 
-vLLM is useful because it attacks a specific serving problem: keeping high-throughput LLM inference from wasting GPU memory and starving the batch scheduler.
+vLLM targets a specific serving problem: keeping high-throughput LLM inference from wasting GPU memory and starving the batch scheduler.
 
-KV cache is the thing to understand first. PagedAttention is the memory-management trick that makes the cache easier to pack. Kubernetes is the operational wrapper that lets you run it as a service, but it does not remove the need to measure token throughput, queueing, latency, and GPU memory.
+Start with KV cache. PagedAttention is the memory-management technique that makes the cache easier to pack. Context length, prompt size, output length, and concurrent users all feed back into the same capacity problem.
 
-Start with one model, one GPU, one clear workload, and one good dashboard. Then scale from evidence.
+Start with one model, one clear workload, and one good dashboard. The Kubernetes deployment details are the next part of this series.
 
 Further reading:
 
 - [Efficient Memory Management for Large Language Model Serving with PagedAttention](https://arxiv.org/abs/2309.06180)
 - [vLLM Online Serving](https://docs.vllm.ai/en/stable/serving/online_serving/)
-- [vLLM Production Stack](https://docs.vllm.ai/en/stable/deployment/integrations/production-stack/)

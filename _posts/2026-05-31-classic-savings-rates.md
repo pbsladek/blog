@@ -53,11 +53,7 @@ That is the setting where a lot of savings advice is still written for a pretend
 
 ## A savings rate is a signal, not a moral score.
 
-Savings rate is usually calculated as:
-
-```text
-savings rate = amount saved / income
-```
+Savings rate is usually calculated as `amount saved / income`.
 
 Simple enough. If you make $8,000 and save $1,600, that is a 20 percent savings rate.
 
@@ -65,11 +61,7 @@ But the number can hide more than it explains.
 
 Two people can both save 10 percent and be in completely different situations. One has a paid-off car, low rent, stable job, and no dependents. The other has student loans, a high-deductible health plan, aging parents, childcare costs, and a job where layoffs are a regular calendar event. The same savings rate does not mean the same risk.
 
-Ask the actual question:
-
-```text
-what does this savings rate protect?
-```
+Ask the actual question: what does this savings rate protect?
 
 Does it protect one missed paycheck? A car repair? A medical deductible? A broken appliance? A layoff? A move? A month where contract work dries up? A parent needing help?
 
@@ -93,17 +85,9 @@ An emergency fund is usually measured in months. That hides the actual dollar dr
 
 If the monthly burn rate was $4,000, then a three-month fund was $12,000. If the real cost of the same household rises to $4,600, the same three-month fund is now $13,800. The old number did not stay protective just because the account balance stayed still.
 
-That is one reason classic advice becomes dangerous. It treats emergency funds like a finish line:
+That is one reason classic advice becomes dangerous. It treats emergency funds like a finish line: save `$X`, then stop thinking about it.
 
-```text
-save $X, then stop thinking about it
-```
-
-Use this version:
-
-```text
-reprice the fund when the household cost structure changes
-```
+Use this version: reprice the fund when the household cost structure changes.
 
 Rent goes up. Insurance renews higher. Food costs shift. A car payment appears. A kid starts daycare. A parent moves in. A job gets riskier. Any of those can change the target.
 
