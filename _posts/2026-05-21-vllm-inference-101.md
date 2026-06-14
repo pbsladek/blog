@@ -1,6 +1,6 @@
 ---
-title: vLLM Inference 101
-excerpt: A walkthrough of LLM inference, KV cache basics, PagedAttention, and local serving options.
+title: A Dense Introduction to vLLM Inference
+excerpt: A dense walkthrough of LLM inference, stochastic generation, KV cache basics, PagedAttention, and local serving options.
 tags:
   - ai
   - inference
@@ -10,7 +10,7 @@ series: vllm-inference
 
 [vLLM](https://docs.vllm.ai/) is an inference engine for serving large language models. It keeps GPUs busy and reduces memory waste while requests come and go.
 
-That memory part matters. Inference is not just "load model, ask question, get answer." The server has to tokenize input, run model forward passes, keep attention state around, batch users together, stream tokens back, and stay inside GPU memory while prompts vary in size.
+That memory part matters. Inference is not just "load model, ask question, get answer." The server has to tokenize input, send those tokens through the model to produce the next-token probabilities, keep attention state around, batch users together, stream tokens back, and avoid running out of GPU memory while prompts vary in size.
 
 <!--more-->
 
@@ -54,7 +54,7 @@ The serving path:
   </div>
 </figure>
 
-The API request is the part users see. Tokenization is still inside the vLLM service, usually as part of input processing before the engine core schedules model work. The scheduler, KV cache, and decode loop are where the expensive serving decisions happen.
+The HTTP API is just the boundary. Tokenization still happens inside the vLLM service, usually as part of input processing before the engine core schedules model work. The scheduler, KV cache, and decode loop are where the expensive serving decisions happen.
 
 ## Quick terms
 
@@ -71,6 +71,7 @@ The API request is the part users see. Tokenization is still inside the vLLM ser
 | **KV cache** | Per-request attention state stored so decode can reuse earlier keys and values. |
 | **TTFT** | Time to first token. How long the user waits before the response starts streaming. |
 | **Throughput** | How much work the system completes, usually measured in tokens per second. |
+| **Stochastic** | Involving randomness. In generation, this usually means sampling from likely next tokens instead of always taking the top one. |
 
 ## Inference is the serving path
 
@@ -89,6 +90,17 @@ The tradeoff is that quantization changes how the model is represented and somet
 LoRA is a little different. Instead of changing every base weight, a LoRA adapter adds a smaller set of learned weights on top of the base model. That lets you adapt behavior without shipping a whole new copy of the model. The base weights are still the big thing you load; the LoRA weights are the small overlay you can attach when you need that variant.
 
 Autoregressive means the model generates one token based on the tokens that came before it. It predicts "what comes next?", appends that token, then does it again. That is the standard pattern for chat and text-generation models. Other model types do different jobs: an embedding model turns text into vectors, a classifier picks a label, and non-autoregressive generators try to produce output without that same one-token-at-a-time loop. Some encoder-decoder models still decode autoregressively, so this is about the generation pattern more than the model family name. vLLM can serve more than plain text generation, but prefill, decode, and KV cache behavior matter most in the autoregressive case.
+
+### Stochastic generation
+
+The model produces scores for possible next tokens, not a finished sentence. Those scores are turned into a probability distribution, and the decoding settings decide how to choose the next token.
+
+- **What:** stochastic generation means randomness is part of token selection. Greedy decoding takes the highest-scoring token. Sampling can choose among likely tokens, so the same prompt can produce different valid continuations.
+- **When:** the choice happens during decode, after the model has produced scores for the next token.
+- **Where:** the serving engine applies the request's generation settings, such as temperature, top-p, top-k, maximum tokens, and sometimes a seed.
+- **Why:** always taking the most likely token can be repetitive, brittle, or too narrow. Sampling gives the model room to vary phrasing, explore alternatives, and avoid getting stuck in the same continuation.
+- **Impact on inference serving:** randomness makes retries, debugging, and load testing less predictable unless you log the prompt, model, generation settings, and seed if one is used. It can also change load indirectly: longer sampled answers consume more decode steps and more KV cache. Multi-output settings such as `n` and separate strategies such as beam search can multiply generated work even when the token choice itself is not random.
+- **Impact on agents:** stochasticity can change plans, tool calls, and stopping points from the same starting prompt. That can help exploration, but it is risky around commands, payments, record updates, and other side effects. Agent systems usually constrain randomness around tool use with lower temperature, structured outputs, validation, careful retries, and persistent state. Once an agent picks a token, calls a tool, or observes a result, that chosen path becomes part of the next prompt.
 
 For an autoregressive language model, inference has two phases worth knowing:
 
