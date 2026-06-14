@@ -16,4 +16,4 @@ RUN bundle install
 
 EXPOSE 4100 35729
 
-CMD ["bundle", "exec", "jekyll", "serve", "--host", "0.0.0.0", "--port", "4100", "--baseurl", "", "--livereload", "--livereload-port", "35729", "--force_polling"]
+CMD ["sh", "-lc", "printf 'url: \"http://127.0.0.1:4100\"\\nbaseurl: \"\"\\n' > /tmp/jekyll-dev.yml && bundle exec jekyll serve --config _config.yml,/tmp/jekyll-dev.yml --host 0.0.0.0 --port 4100 --livereload --livereload-port 35729 --force_polling"]
