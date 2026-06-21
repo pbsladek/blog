@@ -154,6 +154,77 @@ assert(
 
 assert(!cpi_chart.include?("May 2026: +2.3% YTD"), "cpi chart must not use the overflowing final x-axis label")
 
+beef_match = inflation_html.match(/<figure class="diagram diagram--chart" aria-labelledby="beef-inflation-chart">([\s\S]*?)<\/figure>/)
+assert(beef_match, "missing beef inflation chart")
+beef_chart = beef_match[1]
+
+[
+  "Beef and veal CPI since 1950",
+  "Indexed price level, where 1950 equals 100",
+  %(<polyline class="line-chart__series line-chart__series--mega" points="90,313 238,305 386,256 534,211 682,124 830,114" />),
+  %(<polyline class="line-chart__series line-chart__series--inflation" points="90,313 238,302 386,236 534,173 682,98 830,89" />),
+  %(<text class="line-chart__label line-chart__label--small" x="825" y="74" text-anchor="end">All items: 13.9x</text>),
+  %(<text class="line-chart__label line-chart__label--small" x="825" y="139" text-anchor="end">Beef: 12.5x</text>),
+  "Y-axis: price level index, 1950 = 100",
+  "Ground beef:",
+  "$6.745"
+].each do |needle|
+  assert(beef_chart.include?(needle), "beef inflation chart missing #{needle.inspect}")
+end
+
+[
+  "2025 beef:",
+  "2025 all items:",
+  "May 2026 beef: 12.5x",
+  "May 2026 all items: 13.9x"
+].each do |needle|
+  assert(!beef_chart.include?(needle), "beef inflation chart must not use crowded label #{needle.inspect}")
+end
+
+assert(!inflation_html.include?("beef-subsidy-chart"), "beef subsidy chart should be removed")
+assert(!inflation_html.include?("beef without subsidies"), "beef subsidy discussion should be removed")
+assert(!inflation_html.include?("Subsidies are tempting"), "beef subsidy discussion should be removed")
+assert(
+  inflation_html.include?("The two beef numbers are not conflicting.") &&
+    inflation_html.include?("The second number is the recent jump on top of the already-inflated price level."),
+  "beef section must explain the 12.5x long-window number versus the 44 percent recent-window number"
+)
+
+ground_beef_match = inflation_html.match(/<figure class="diagram diagram--chart" aria-labelledby="ground-beef-price-chart">([\s\S]*?)<\/figure>/)
+assert(ground_beef_match, "missing ground beef dollar price chart")
+ground_beef_chart = ground_beef_match[1]
+
+[
+  "Regular ground beef, dollars per pound",
+  "BLS/FRED average retail price series",
+  %(<polyline class="line-chart__series line-chart__series--small" points="90,237 383,226 748,131 830,32" />),
+  "1984 avg.",
+  "$1.29",
+  "2000 avg.",
+  "$1.57",
+  "2020 avg.",
+  "$4.12",
+  "May 2026",
+  "$6.745",
+  "Y-axis: average retail dollars per pound"
+].each do |needle|
+  assert(ground_beef_chart.include?(needle), "ground beef dollar-price chart missing #{needle.inspect}")
+end
+
+[
+  "regular ground beef, not the full beef-and-veal CPI basket",
+  "roughly a 64 percent increase"
+].each do |needle|
+  assert(inflation_html.include?(needle), "ground beef dollar-price explanation missing #{needle.inspect}")
+end
+
+[
+  "<th>Regular ground beef</th>",
+  "Average retail price</th>"
+].each do |needle|
+  assert(!inflation_html.include?(needle), "ground beef dollar-price table should be replaced by a chart")
+end
+
 season_match = inflation_html.match(/<figure class="diagram diagram--chart" aria-labelledby="ski-season-chart">([\s\S]*?)<\/figure>/)
 assert(season_match, "missing ski season pass chart")
 season_chart = season_match[1]
@@ -215,6 +286,8 @@ css = read("_site/assets/css/diagrams.css")
   "grid-template-columns: minmax(9.5rem, 1fr) 2.25rem minmax(9.5rem, 1fr) 2.25rem minmax(9.5rem, 1fr);",
   ".page__content .line-chart__tick--compact",
   "font-size: 0.66rem;",
+  ".page__content .line-chart__label--small",
+  "font-size: 0.68rem;",
   ".page__content .diagram__connector--route-out",
   "grid-column: 5;",
   "@media (max-width: 760px)",

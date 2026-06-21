@@ -409,6 +409,10 @@
   font-weight: 850;
 }
 
+.page__content .line-chart__label--small {
+  font-size: 0.68rem;
+}
+
 .page__content .line-chart__label--muted {
   fill: var(--diagram-muted);
   font-weight: 750;

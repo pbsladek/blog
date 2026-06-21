@@ -108,6 +108,117 @@ FRED's [effective federal funds rate](https://fred.stlouisfed.org/series/FEDFUND
 
 The lesson is not that rates must return to 1980s levels. The lesson is that plans should survive normal or elevated rates instead of depending on zero-rate policy coming back.
 
+## Beef shows inflation in the grocery cart.
+
+Inflation is easy to make abstract when the conversation stays with CPI releases, Fed policy, and interest-rate history. The household version is simpler: the same cart costs more, the same meal costs more, and the old grocery number stops matching reality.
+
+Beef is useful because it is familiar and volatile. It is not just a luxury example or a hobby example. It sits inside normal food spending, and it also sits inside a complicated production system: cattle cycles, feed costs, drought, processing capacity, imports, exports, and policy.
+
+The first useful view is the long run. For that, use an index. An index is not a shelf price. It is a measuring stick for price change. BLS warns on its [average price data](https://fred.stlouisfed.org/series/APU0000703112) that average consumer prices are best for price levels in a particular month, while CPI indexes are better for measuring price change over time.
+
+So the first chart uses [BLS public API](https://www.bls.gov/developers/) series `CUUR0000SAF11211` for beef and veal and `CUUR0000SA0` for all items. "All items" means the broad CPI basket: food, housing, energy, transportation, medical care, services, goods, and the rest of normal consumer spending. Both lines are rebased so 1950 equals 100. That means the chart treats 1950 as the shared starting point, then shows how many times higher each category got from there.
+
+<figure class="diagram diagram--chart" aria-labelledby="beef-inflation-chart">
+  <figcaption id="beef-inflation-chart" class="diagram__caption">Beef and veal CPI since 1950</figcaption>
+  <p class="chart-panel__note">Indexed price level, where 1950 equals 100. A value of 1,250 means roughly 12.5x the 1950 price level.</p>
+  <svg class="line-chart" viewBox="0 0 900 420" role="img" aria-labelledby="beef-inflation-title beef-inflation-desc">
+    <title id="beef-inflation-title">Beef and veal CPI compared with all-items CPI from 1950 to May 2026</title>
+    <desc id="beef-inflation-desc">The beef and veal CPI index rose from 100 in 1950 to 1249 by May 2026. The all-items CPI rose from 100 to 1392 over the same period. Since January 2020, beef and veal rose about 44 percent while all items rose about 30 percent.</desc>
+    <line class="line-chart__grid" x1="90" y1="330" x2="830" y2="330" />
+    <line class="line-chart__grid" x1="90" y1="243" x2="830" y2="243" />
+    <line class="line-chart__grid" x1="90" y1="157" x2="830" y2="157" />
+    <line class="line-chart__grid" x1="90" y1="70" x2="830" y2="70" />
+    <line class="line-chart__axis" x1="90" y1="330" x2="830" y2="330" />
+    <line class="line-chart__axis" x1="90" y1="70" x2="90" y2="330" />
+    <text class="line-chart__tick" x="64" y="334" text-anchor="end">0</text>
+    <text class="line-chart__tick" x="64" y="247" text-anchor="end">500</text>
+    <text class="line-chart__tick" x="64" y="161" text-anchor="end">1,000</text>
+    <text class="line-chart__tick" x="64" y="74" text-anchor="end">1,500</text>
+    <polyline class="line-chart__series line-chart__series--mega" points="90,313 238,305 386,256 534,211 682,124 830,114" />
+    <polyline class="line-chart__series line-chart__series--inflation" points="90,313 238,302 386,236 534,173 682,98 830,89" />
+    <circle class="line-chart__point line-chart__point--mega" cx="90" cy="313" r="5" />
+    <circle class="line-chart__point line-chart__point--mega" cx="238" cy="305" r="5" />
+    <circle class="line-chart__point line-chart__point--mega" cx="386" cy="256" r="5" />
+    <circle class="line-chart__point line-chart__point--mega" cx="534" cy="211" r="5" />
+    <circle class="line-chart__point line-chart__point--mega" cx="682" cy="124" r="5" />
+    <circle class="line-chart__point line-chart__point--mega" cx="830" cy="114" r="5" />
+    <circle class="line-chart__point line-chart__point--inflation" cx="90" cy="313" r="5" />
+    <circle class="line-chart__point line-chart__point--inflation" cx="238" cy="302" r="5" />
+    <circle class="line-chart__point line-chart__point--inflation" cx="386" cy="236" r="5" />
+    <circle class="line-chart__point line-chart__point--inflation" cx="534" cy="173" r="5" />
+    <circle class="line-chart__point line-chart__point--inflation" cx="682" cy="98" r="5" />
+    <circle class="line-chart__point line-chart__point--inflation" cx="830" cy="89" r="5" />
+    <text class="line-chart__label line-chart__label--small" x="825" y="74" text-anchor="end">All items: 13.9x</text>
+    <text class="line-chart__label line-chart__label--small" x="825" y="139" text-anchor="end">Beef: 12.5x</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="90" y="364" text-anchor="middle">1950</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="238" y="364" text-anchor="middle">1970</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="386" y="364" text-anchor="middle">1990</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="534" y="364" text-anchor="middle">2010</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="682" y="364" text-anchor="middle">2025</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="830" y="364" text-anchor="end">May 2026</text>
+    <text class="line-chart__label line-chart__label--muted" x="90" y="394" text-anchor="start">Y-axis: price level index, 1950 = 100</text>
+  </svg>
+  <div class="chart-legend" aria-hidden="true">
+    <span class="chart-legend__item"><span class="chart-legend__swatch chart-legend__swatch--mega"></span> Beef and veal CPI</span>
+    <span class="chart-legend__item"><span class="chart-legend__swatch chart-legend__swatch--inflation"></span> All-items CPI</span>
+  </div>
+  <div class="chart-callouts">
+    <p><strong>Long window:</strong> from 1950 to May 2026, beef and veal rose about 12.5x.</p>
+    <p><strong>Short window:</strong> from January 2020 to May 2026, beef and veal rose about 44 percent.</p>
+    <p><strong>Ground beef:</strong> BLS/FRED had regular ground beef at `$6.745` per pound in May 2026.</p>
+  </div>
+</figure>
+
+The math behind the chart is simple. The 1950 beef-and-veal CPI value was `29.933`, and the May 2026 value was `373.867`. Divide `373.867` by `29.933` and you get about `12.5`. That is why the chart says beef and veal cost about 12.5x more than in 1950. The all-items line uses the same method: `335.123` divided by `24.067` is about `13.9`.
+
+The two beef numbers are not conflicting. They are measuring different windows. The 12.5x number compares May 2026 with 1950, a span of more than seventy-five years. The 44 percent number compares May 2026 with January 2020, a much shorter period that started after most of the long-run inflation had already happened.
+
+Think of it this way: if something went from `$1` in 1950 to `$8.70` in January 2020, then to `$12.50` in May 2026, both statements can be true. It is up 12.5x since 1950, and it is also up about 44 percent since 2020. The second number is the recent jump on top of the already-inflated price level.
+
+The second useful view is actual dollars. BLS/FRED's [regular ground beef average price series](https://fred.stlouisfed.org/series/APU0000703112) starts much later than 1950, so it cannot replace the long-run CPI chart. But it does show what shoppers recognize: dollars per pound.
+
+<figure class="diagram diagram--chart" aria-labelledby="ground-beef-price-chart">
+  <figcaption id="ground-beef-price-chart" class="diagram__caption">Regular ground beef, dollars per pound</figcaption>
+  <p class="chart-panel__note">BLS/FRED average retail price series. Annual averages for 1984, 2000, and 2020; monthly value for May 2026.</p>
+  <svg class="line-chart" viewBox="0 0 900 380" role="img" aria-labelledby="ground-beef-title ground-beef-desc">
+    <title id="ground-beef-title">Regular ground beef average retail price per pound</title>
+    <desc id="ground-beef-desc">Regular ground beef averaged one dollar and twenty-nine cents per pound in 1984, one dollar and fifty-seven cents in 2000, four dollars and twelve cents in 2020, and six dollars and seventy-four and a half cents in May 2026.</desc>
+    <line class="line-chart__grid" x1="90" y1="285" x2="830" y2="285" />
+    <line class="line-chart__grid" x1="90" y1="210" x2="830" y2="210" />
+    <line class="line-chart__grid" x1="90" y1="135" x2="830" y2="135" />
+    <line class="line-chart__grid" x1="90" y1="60" x2="830" y2="60" />
+    <line class="line-chart__axis" x1="90" y1="285" x2="830" y2="285" />
+    <line class="line-chart__axis" x1="90" y1="60" x2="90" y2="285" />
+    <text class="line-chart__tick" x="64" y="289" text-anchor="end">$0</text>
+    <text class="line-chart__tick" x="64" y="214" text-anchor="end">$2</text>
+    <text class="line-chart__tick" x="64" y="139" text-anchor="end">$4</text>
+    <text class="line-chart__tick" x="64" y="64" text-anchor="end">$6</text>
+    <polyline class="line-chart__series line-chart__series--small" points="90,237 383,226 748,131 830,32" />
+    <circle class="line-chart__point line-chart__point--small" cx="90" cy="237" r="5" />
+    <circle class="line-chart__point line-chart__point--small" cx="383" cy="226" r="5" />
+    <circle class="line-chart__point line-chart__point--small" cx="748" cy="131" r="5" />
+    <circle class="line-chart__point line-chart__point--small" cx="830" cy="32" r="5" />
+    <text class="line-chart__label" x="104" y="226">$1.29</text>
+    <text class="line-chart__label" x="397" y="215">$1.57</text>
+    <text class="line-chart__label" x="650" y="124">$4.12</text>
+    <text class="line-chart__label" x="708" y="24">$6.745</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="90" y="322" text-anchor="middle">1984 avg.</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="383" y="322" text-anchor="middle">2000 avg.</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="748" y="322" text-anchor="middle">2020 avg.</text>
+    <text class="line-chart__tick line-chart__tick--compact" x="830" y="322" text-anchor="end">May 2026</text>
+    <text class="line-chart__label line-chart__label--muted" x="90" y="352" text-anchor="start">Y-axis: average retail dollars per pound</text>
+  </svg>
+  <div class="chart-callouts">
+    <p><strong>1984:</strong> regular ground beef averaged `$1.29` per pound.</p>
+    <p><strong>2020:</strong> it averaged `$4.12` per pound.</p>
+    <p><strong>May 2026:</strong> it reached `$6.745` per pound.</p>
+  </div>
+</figure>
+
+Do not expect those dollar prices to match the index chart exactly. They are a different BLS series: regular ground beef, not the full beef-and-veal CPI basket, and the chart compares annual averages with one monthly value. The direction still matches the story. Regular ground beef went from about `$4.12` in 2020 to `$6.745` in May 2026, which is roughly a 64 percent increase.
+
+That is why both charts are useful. The index chart gives the long historical comparison. The dollar chart makes the grocery-store price concrete. Together they show the same household lesson: inflation is not just a statistic. It is the old mental price for a normal item slowly becoming useless.
+
 ## Ski resorts show how prices feel.
 
 Ski resorts are a useful example because the price increase is easy to blame on the company you see at the ticket window. Sometimes that blame is fair. Corporate ownership, consolidation, luxury positioning, and dynamic pricing all matter. But a real historical anchor is better than a vague memory that skiing used to be cheap.
