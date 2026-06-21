@@ -9,6 +9,10 @@
   --diagram-accent: #38bdf8;
   --diagram-accent-soft: rgba(56, 189, 248, 0.14);
   --diagram-success: #86efac;
+  --chart-inflation: #38bdf8;
+  --chart-small: #86efac;
+  --chart-mega: #f59e0b;
+  --chart-season: #c084fc;
   --diagram-shadow: rgba(0, 0, 0, 0.26);
 }
 
@@ -23,6 +27,10 @@
   --diagram-accent: #0891b2;
   --diagram-accent-soft: rgba(8, 145, 178, 0.12);
   --diagram-success: #15803d;
+  --chart-inflation: #0891b2;
+  --chart-small: #15803d;
+  --chart-mega: #b45309;
+  --chart-season: #7e22ce;
   --diagram-shadow: rgba(15, 23, 42, 0.12);
 }
 
@@ -284,6 +292,191 @@
   color: var(--diagram-success);
 }
 
+.page__content .diagram--chart {
+  width: min(1040px, calc(100vw - 2rem));
+}
+
+.page__content .chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.page__content .chart-panel {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--diagram-border);
+  border-radius: 8px;
+  background: var(--diagram-surface);
+}
+
+.page__content .chart-panel__title {
+  margin: 0 0 0.25rem;
+  color: var(--diagram-text);
+  font-size: clamp(1.02rem, 1.7vw, 1.18rem);
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.page__content .chart-panel__note {
+  margin: 0 0 0.95rem;
+  color: var(--diagram-muted);
+  font-size: 0.84rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.page__content .line-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.page__content .line-chart__grid {
+  stroke: rgba(148, 163, 184, 0.24);
+  stroke-width: 1;
+}
+
+.page__content .line-chart__axis {
+  stroke: var(--diagram-border-strong);
+  stroke-width: 1.4;
+}
+
+.page__content .line-chart__tick {
+  fill: var(--diagram-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.page__content .line-chart__tick--compact {
+  font-size: 0.66rem;
+}
+
+.page__content .line-chart__series {
+  fill: none;
+  stroke: var(--chart-color, var(--diagram-accent));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.5;
+}
+
+.page__content .line-chart__series--dashed {
+  stroke-dasharray: 8 7;
+}
+
+.page__content .line-chart__series--inflation {
+  --chart-color: var(--chart-inflation);
+}
+
+.page__content .line-chart__series--small {
+  --chart-color: var(--chart-small);
+}
+
+.page__content .line-chart__series--mega {
+  --chart-color: var(--chart-mega);
+}
+
+.page__content .line-chart__series--season {
+  --chart-color: var(--chart-season);
+}
+
+.page__content .line-chart__point {
+  fill: var(--diagram-bg);
+  stroke: var(--chart-color, var(--diagram-accent));
+  stroke-width: 3;
+}
+
+.page__content .line-chart__point--inflation {
+  --chart-color: var(--chart-inflation);
+}
+
+.page__content .line-chart__point--small {
+  --chart-color: var(--chart-small);
+}
+
+.page__content .line-chart__point--mega {
+  --chart-color: var(--chart-mega);
+}
+
+.page__content .line-chart__point--season {
+  --chart-color: var(--chart-season);
+}
+
+.page__content .line-chart__label {
+  fill: var(--diagram-text);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.page__content .line-chart__label--muted {
+  fill: var(--diagram-muted);
+  font-weight: 750;
+}
+
+.page__content .chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.9rem;
+  margin-top: 1rem;
+  color: var(--diagram-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.page__content .chart-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.page__content .chart-legend__swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 999px;
+  background: var(--chart-color);
+}
+
+.page__content .chart-legend__swatch--inflation {
+  --chart-color: var(--chart-inflation);
+}
+
+.page__content .chart-legend__swatch--small {
+  --chart-color: var(--chart-small);
+}
+
+.page__content .chart-legend__swatch--mega {
+  --chart-color: var(--chart-mega);
+}
+
+.page__content .chart-legend__swatch--season {
+  --chart-color: var(--chart-season);
+}
+
+.page__content .chart-callouts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.page__content .chart-callouts p {
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--diagram-border);
+  border-radius: 8px;
+  color: var(--diagram-text);
+  background: var(--diagram-surface);
+  font-size: 0.84rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.page__content .chart-callouts strong {
+  color: var(--diagram-accent);
+}
+
 @media (max-width: 760px) {
   .page__content .diagram {
     width: 100vw;
@@ -355,5 +548,21 @@
   .page__content .diagram__memory-items,
   .page__content .diagram__worker-grid {
     grid-template-columns: 1fr;
+  }
+
+  .page__content .chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page__content .chart-callouts {
+    grid-template-columns: 1fr;
+  }
+
+  .page__content .line-chart__tick {
+    font-size: 0.7rem;
+  }
+
+  .page__content .line-chart__label {
+    font-size: 0.72rem;
   }
 }

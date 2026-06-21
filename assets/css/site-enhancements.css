@@ -57,11 +57,17 @@ html[data-theme="light"] .page__footer {
 html[data-theme="light"] .site-title,
 html[data-theme="light"] .greedy-nav a,
 html[data-theme="light"] .page__title,
+html[data-theme="light"] .page__title a,
 html[data-theme="light"] .archive__item-title,
 html[data-theme="light"] .archive__item-title a,
 html[data-theme="light"] .archive__subtitle,
 html[data-theme="light"] .author__name {
   color: var(--site-text);
+}
+
+html[data-theme="light"] .page__title a:hover,
+html[data-theme="light"] .page__title a:focus {
+  color: var(--site-link-hover);
 }
 
 html[data-theme="light"] .page__content {
@@ -93,6 +99,17 @@ html[data-theme="light"] .page__content :not(pre) > code {
   border-color: rgba(15, 107, 120, 0.24);
   color: #0f5260;
   background: rgba(15, 107, 120, 0.09);
+}
+
+html[data-theme="light"] .page__content table,
+html[data-theme="light"] .page__content table th,
+html[data-theme="light"] .page__content table td {
+  border-color: var(--site-border);
+}
+
+html[data-theme="light"] .page__content table th {
+  color: var(--site-text);
+  background: var(--site-surface-soft);
 }
 
 html[data-theme="light"] .archive__item {

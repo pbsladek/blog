@@ -47,8 +47,16 @@ end
 
 vllm_path = "_site/2026/05/21/vllm-inference-101/index.html"
 kubernetes_path = "_site/2026/06/14/vllm-kubernetes/index.html"
+classic_savings_path = "_site/2026/05/31/classic-savings-rates/index.html"
+inflation_path = "_site/2026/06/01/inflation-emergency-fund-target/index.html"
+renting_path = "_site/2026/06/02/renting-is-not-wasting-money/index.html"
+relationships_path = "_site/2026/06/03/relationships-financial-plan/index.html"
 vllm_html = read(vllm_path)
 kubernetes_html = read(kubernetes_path)
+classic_savings_html = read(classic_savings_path)
+inflation_html = read(inflation_path)
+renting_html = read(renting_path)
+relationships_html = read(relationships_path)
 
 figure_count = vllm_html.scan(/<figure class="diagram(?: [^"]*)?" aria-labelledby="/).length
 assert(figure_count == 2, "expected 2 diagrams in the vLLM 101 post, found #{figure_count}")
@@ -115,6 +123,80 @@ assert(
   "router post text must state that one worker handles the request"
 )
 
+[
+  [classic_savings_html, "Classic Savings Rates Are Dubious"],
+  [inflation_html, "Inflation Keeps Moving the Emergency Fund Target"],
+  [renting_html, "Renting Is Not Wasting Money"],
+  [relationships_html, "Relationships Are Part of the Financial Plan"]
+].each do |html, current_title|
+  assert(html.include?(%(<h2 id="post-series-title" class="post-series__title">Classic Savings Rates</h2>)), "#{current_title} missing series nav")
+  assert(html.include?(current_title), "#{current_title} missing from rendered page")
+end
+
+cpi_match = inflation_html.match(/<figure class="diagram diagram--chart" aria-labelledby="cpi-stack-chart">([\s\S]*?)<\/figure>/)
+assert(cpi_match, "missing cumulative inflation chart")
+cpi_chart = cpi_match[1]
+
+assert(
+  cpi_chart.include?(%(<text class="line-chart__tick line-chart__tick--compact" x="80" y="376" text-anchor="start">2021 +7.6%</text>)),
+  "cpi chart first x-axis period label must be start-anchored and compact"
+)
+
+assert(
+  cpi_chart.include?(%(<text class="line-chart__label" x="92" y="306">0.0%</text>)),
+  "cpi chart zero label must sit above the origin marker and line"
+)
+
+assert(
+  cpi_chart.include?(%(<text class="line-chart__tick line-chart__tick--compact" x="830" y="376" text-anchor="end">May 2026 +2.3%</text>)),
+  "cpi chart last x-axis period label must be end-anchored and compact"
+)
+
+assert(!cpi_chart.include?("May 2026: +2.3% YTD"), "cpi chart must not use the overflowing final x-axis label")
+
+season_match = inflation_html.match(/<figure class="diagram diagram--chart" aria-labelledby="ski-season-chart">([\s\S]*?)<\/figure>/)
+assert(season_match, "missing ski season pass chart")
+season_chart = season_match[1]
+
+[
+  "Season-pass prices in nominal and December 2025 dollars",
+  "Ski season pass line graph with nominal and inflation-adjusted prices",
+  %(<polyline class="line-chart__series line-chart__series--small" points="150,285 470,181 790,92" />),
+  %(<polyline class="line-chart__series line-chart__series--season" points="150,237 470,125 790,92" />),
+  "line-chart__point line-chart__point--season",
+  "chart-legend__swatch chart-legend__swatch--small",
+  "$282",
+  "$877",
+  "$1,051",
+  "inflation adds $257",
+  "inflation adds $298",
+  "20 percent above the 2008 launch price after CPI",
+  "1958 local pass",
+  "2008 Epic launch",
+  "2025 Epic adult"
+].each do |needle|
+  assert(season_chart.include?(needle), "ski season pass chart missing #{needle.inspect}")
+end
+
+[
+  "Season-pass prices in nominal and 2026 dollars",
+  "$1,089",
+  "May 2026 dollars"
+].each do |needle|
+  assert(!season_chart.include?(needle), "ski season pass chart must not use stale 2026 label #{needle.inspect}")
+end
+
+assert(
+  inflation_html.include?("December 2025 CPIAUCSL of <code class=\"language-plaintext highlighter-rouge\">326.031</code>"),
+  "ski season pass method note must include the December 2025 CPIAUCSL endpoint"
+)
+
+assert(
+  inflation_html.match?(%r{<th(?: [^>]*)?>Real historical price</th>}) &&
+    inflation_html.match?(%r{<th(?: [^>]*)?>CPI-adjusted to December 2025</th>}),
+  "classic savings inflation price table must render readable table headers"
+)
+
 css = read("_site/assets/css/diagrams.css")
 [
   ".page__content .diagram",
@@ -131,6 +213,8 @@ css = read("_site/assets/css/diagrams.css")
   "width: min(100%, 34rem);",
   ".page__content .diagram__route",
   "grid-template-columns: minmax(9.5rem, 1fr) 2.25rem minmax(9.5rem, 1fr) 2.25rem minmax(9.5rem, 1fr);",
+  ".page__content .line-chart__tick--compact",
+  "font-size: 0.66rem;",
   ".page__content .diagram__connector--route-out",
   "grid-column: 5;",
   "@media (max-width: 760px)",
@@ -141,6 +225,16 @@ css = read("_site/assets/css/diagrams.css")
   ".page__content .diagram__worker-grid"
 ].each do |needle|
   assert(css.include?(needle), "responsive diagram CSS missing #{needle.inspect}")
+end
+
+site_css = read("_site/assets/css/site-enhancements.css")
+[
+  'html[data-theme="light"] .page__title a',
+  'html[data-theme="light"] .page__content table th',
+  "color: var(--site-text);",
+  "background: var(--site-surface-soft);"
+].each do |needle|
+  assert(site_css.include?(needle), "light-mode table CSS missing #{needle.inspect}")
 end
 
 puts "diagram checks passed"

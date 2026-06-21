@@ -5,3 +5,14 @@ vllm-inference:
       url: /2026/05/21/vllm-inference-101/
     - title: Running vLLM in Kubernetes
       url: /2026/06/14/vllm-kubernetes/
+classic-savings-rates:
+  title: Classic Savings Rates
+  posts:
+    - title: Classic Savings Rates Are Dubious
+      url: /2026/05/31/classic-savings-rates/
+    - title: Inflation Keeps Moving the Emergency Fund Target
+      url: /2026/06/01/inflation-emergency-fund-target/
+    - title: Renting Is Not Wasting Money
+      url: /2026/06/02/renting-is-not-wasting-money/
+    - title: Relationships Are Part of the Financial Plan
+      url: /2026/06/03/relationships-financial-plan/
