@@ -126,7 +126,7 @@ For inference API access, validate tokens at the edge:
 The internal header pattern is useful, but only if the gateway is the only thing allowed to set it. For example, the gateway validates a JWT, then forwards:
 
 ```http
-x-authenticated-subject: user:alice@example.com
+x-authenticated-subject: user:paul@example.com
 x-authenticated-groups: inference-developers,finance-users
 x-request-id: 4d6c...
 ```

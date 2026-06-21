@@ -230,6 +230,48 @@
   min-width: 0;
 }
 
+.page__content .diagram__auth-flow {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+}
+
+.page__content .diagram__auth-lane {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.25rem minmax(0, 1.35fr) 2.25rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+}
+
+.page__content .diagram__auth-lane > .diagram__node,
+.page__content .diagram__auth-lane > .diagram__group {
+  width: 100%;
+  min-width: 0;
+}
+
+.page__content .diagram__auth-stack {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.page__content .diagram__auth-stack > .diagram__node {
+  width: 100%;
+  min-width: 0;
+}
+
+.page__content .diagram__auth-side {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.page__content .diagram__auth-side > .diagram__node {
+  width: 100%;
+  min-width: 0;
+}
+
 .page__content .diagram__cluster {
   display: grid;
   justify-items: center;
@@ -545,13 +587,16 @@
 
 @media (max-width: 1040px) {
   .page__content .diagram__traffic-grid,
-  .page__content .diagram__dns-grid {
+  .page__content .diagram__dns-grid,
+  .page__content .diagram__auth-lane {
     grid-template-columns: 1fr;
     justify-items: center;
   }
 
   .page__content .diagram__traffic-grid > .diagram__group,
   .page__content .diagram__dns-grid > .diagram__group,
+  .page__content .diagram__auth-lane > .diagram__group,
+  .page__content .diagram__auth-lane > .diagram__node,
   .page__content .diagram__transit,
   .page__content .diagram__dns-column {
     width: min(100%, 34rem);
@@ -562,13 +607,15 @@
   }
 
   .page__content .diagram__traffic-grid > .diagram__connector,
-  .page__content .diagram__dns-grid > .diagram__connector {
+  .page__content .diagram__dns-grid > .diagram__connector,
+  .page__content .diagram__auth-lane > .diagram__connector {
     width: 1.2rem;
     height: 1.5rem;
   }
 
   .page__content .diagram__traffic-grid > .diagram__connector::before,
-  .page__content .diagram__dns-grid > .diagram__connector::before {
+  .page__content .diagram__dns-grid > .diagram__connector::before,
+  .page__content .diagram__auth-lane > .diagram__connector::before {
     top: 0;
     bottom: 0.32rem;
     left: 50%;
@@ -578,7 +625,8 @@
   }
 
   .page__content .diagram__traffic-grid > .diagram__connector::after,
-  .page__content .diagram__dns-grid > .diagram__connector::after {
+  .page__content .diagram__dns-grid > .diagram__connector::after,
+  .page__content .diagram__auth-lane > .diagram__connector::after {
     top: auto;
     right: auto;
     bottom: 0.05rem;
@@ -659,6 +707,7 @@
   .page__content .diagram__grid--two,
   .page__content .diagram__traffic-grid,
   .page__content .diagram__dns-grid,
+  .page__content .diagram__auth-side,
   .page__content .diagram__cluster-grid,
   .page__content .diagram__pool-items,
   .page__content .diagram__worker-grid {

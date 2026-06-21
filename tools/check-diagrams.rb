@@ -71,6 +71,12 @@ assert(
   "expected 4 diagrams in the Kubernetes cluster basics post, found #{cluster_basics_figure_count}"
 )
 
+rbac_figure_count = rbac_html.scan(/<figure class="diagram(?: [^"]*)?" aria-labelledby="/).length
+assert(
+  rbac_figure_count == 2,
+  "expected 2 diagrams in the Kubernetes RBAC basics post, found #{rbac_figure_count}"
+)
+
 serving_match = vllm_html.match(/<figure class="diagram diagram--flow" aria-labelledby="serving-path-diagram">([\s\S]*?)<\/figure>/)
 assert(serving_match, "missing serving path diagram")
 serving = serving_match[1]
@@ -314,6 +320,63 @@ end
 [
   "Kubernetes RBAC Basics for vLLM Operators",
   "RBAC is how Kubernetes decides who can do what to Kubernetes API objects.",
+  "Kubernetes supports several authorizer modes, including RBAC, Node, Webhook, ABAC, AlwaysAllow, and AlwaysDeny.",
+  "RBAC is the main authorizer you use for human users, service accounts, CI, and controllers",
+  "the Node authorizer handles kubelet-specific access",
+  "The API server is the enforcement point.",
+  "Control-plane components",
+  "Admission is the last policy checkpoint before an allowed write changes cluster state.",
+  "RBAC might allow a CI service account to create Pods in <code class=\"language-plaintext highlighter-rouge\">inference-models</code>",
+  "Mutating admission runs before validating admission",
+  "Admission is not a replacement for RBAC.",
+  "Kyverno is one common way to manage those admission policies.",
+  "It runs in the cluster as a dynamic admission controller",
+  "the API server sends matching AdmissionReview requests to Kyverno",
+  "For validation, it can reject a vLLM Deployment that uses <code class=\"language-plaintext highlighter-rouge\">latest</code>",
+  "For mutation, it can add standard labels",
+  "this Kyverno <code class=\"language-plaintext highlighter-rouge\">MutatingPolicy</code> modifies matching vLLM Pods as they are created",
+  "default-vllm-pod-platform-fields",
+  "platform.example.com/workload",
+  "prometheus.io/scrape",
+  "runtimeClassName",
+  "The policy object is YAML, but the value under <code class=\"language-plaintext highlighter-rouge\">applyConfiguration.expression</code> is a CEL expression.",
+  "That is why the patch body uses <code class=\"language-plaintext highlighter-rouge\">Object{...}</code> syntax instead of normal YAML indentation.",
+  "The secure form is an image digest such as <code class=\"language-plaintext highlighter-rouge\">vllm/vllm-openai@sha256:...</code>",
+  "require-vllm-image-digests",
+  "validationActions",
+  "container.image.contains",
+  "Kyverno also has <code class=\"language-plaintext highlighter-rouge\">ImageValidatingPolicy</code>",
+  "policy reporting and background scans",
+  "Kyverno still does not replace RBAC or model-layer authorization.",
+  "Normal read requests such as <code class=\"language-plaintext highlighter-rouge\">get</code>, <code class=\"language-plaintext highlighter-rouge\">list</code>, and <code class=\"language-plaintext highlighter-rouge\">watch</code> do not go through admission.",
+  "a validating admission policy cannot save you from a user who is already authorized to read Secret values.",
+  "Dex is an OpenID Connect identity provider and broker.",
+  "The important split is identity versus permission.",
+  "It is not a Kubernetes authorizer.",
+  "issuer URL, client ID, username claim, and groups claim",
+  "kube-apiserver OIDC configuration",
+  "/etc/kubernetes/manifests/kube-apiserver.yaml",
+  "--oidc-issuer-url=https://dex.example.com",
+  "--oidc-client-id=kubernetes",
+  "--oidc-username-claim=email",
+  "--oidc-groups-claim=groups",
+  "https://api-server.example.com:6443",
+  "certificate-authority-data",
+  "client.authentication.k8s.io/v1",
+  "kubectl",
+  "oidc-login",
+  "get-token",
+  "--oidc-extra-scope=groups",
+  "The <code class=\"language-plaintext highlighter-rouge\">server</code> field is the Kubernetes API server endpoint: <code class=\"language-plaintext highlighter-rouge\">https://api-server.example.com:6443</code>",
+  "the client is talking to the API server",
+  "as a generic target",
+  "Dex also makes self-service Kubernetes access easier to operate.",
+  "generates a kubeconfig from fixed cluster settings",
+  "That self-service flow should generate configuration, not permission.",
+  "Access still comes from identity-provider groups and RBAC bindings.",
+  "Platform owns the Dex client, issuer URL, callback settings, cluster CA, and approved kubeconfig template.",
+  "remove the user from the identity-provider group",
+  "Dex should not get broad RBAC just because it participates in authentication",
   "Role, ClusterRole, RoleBinding, ClusterRoleBinding",
   "A developer who only needs to inspect model-serving resources should not be able to mutate Deployments or read Secrets.",
   "If the router discovers workers through Kubernetes labels, it needs read access to the objects it watches.",
@@ -323,6 +386,63 @@ end
 ].each do |needle|
   assert(rbac_html.include?(needle), "RBAC basics post missing #{needle.inspect}")
 end
+
+rbac_auth_match = rbac_html.match(/<figure class="diagram" aria-labelledby="k8s-rbac-auth-flow-diagram">([\s\S]*?)<\/figure>/)
+assert(rbac_auth_match, "missing Kubernetes RBAC auth flow diagram")
+rbac_auth = rbac_auth_match[1]
+
+assert(rbac_auth.include?("diagram__auth-flow"), "RBAC auth diagram must use the auth-flow layout")
+assert(rbac_auth.include?("diagram__auth-lane"), "RBAC auth diagram must use the auth lane layout")
+assert(rbac_auth.include?("diagram__auth-stack"), "RBAC auth diagram must group API server steps")
+assert(rbac_auth.include?("diagram__auth-side"), "RBAC auth diagram must include related control-plane context")
+
+assert(
+  ordered?(
+    rbac_auth,
+    [
+      "Kubernetes API auth flow",
+      "Client request",
+      "API server",
+      "Authentication",
+      "Authorization",
+      "Admission",
+      "Stored state",
+      "RBAC policy objects",
+      "Control-plane components"
+    ]
+  ),
+  "RBAC auth diagram no longer shows client -> API server authn/authz/admission -> etcd-backed state"
+)
+
+dex_auth_match = rbac_html.match(/<figure class="diagram" aria-labelledby="dex-oidc-auth-flow-diagram">([\s\S]*?)<\/figure>/)
+assert(dex_auth_match, "missing Dex OIDC auth flow diagram")
+dex_auth = dex_auth_match[1]
+
+assert(dex_auth.include?("diagram__auth-flow"), "Dex auth diagram must use the auth-flow layout")
+assert(dex_auth.scan("diagram__auth-lane").length >= 2, "Dex auth diagram must show login and API-server lanes")
+assert(dex_auth.include?("diagram__auth-stack"), "Dex auth diagram must group Dex and API server steps")
+
+assert(
+  ordered?(
+    dex_auth,
+    [
+      "Kubernetes auth flow with Dex and OIDC",
+      "User and kubectl login",
+      "Dex OIDC issuer",
+      "Connector login",
+      "ID token",
+      "kubectl request",
+      "API server OIDC config",
+      "Control plane decision",
+      "Authenticate token",
+      "Map claims",
+      "RBAC authorizer",
+      "Admission and etcd",
+      "Allowed or denied"
+    ]
+  ),
+  "Dex OIDC auth diagram no longer shows login -> Dex token -> API server validation -> RBAC decision"
+)
 
 [
   "Securing vLLM on Kubernetes",
@@ -385,8 +505,14 @@ css = read("_site/assets/css/diagrams.css")
   "grid-template-columns: minmax(0, 1fr) 2.25rem minmax(0, 1fr);",
   ".page__content .diagram__transit",
   ".page__content .diagram__dns-column",
+  ".page__content .diagram__auth-flow",
+  ".page__content .diagram__auth-lane",
+  "grid-template-columns: minmax(0, 1fr) 2.25rem minmax(0, 1.35fr) 2.25rem minmax(0, 1fr);",
+  ".page__content .diagram__auth-stack",
+  ".page__content .diagram__auth-side",
   "@media (max-width: 1040px)",
   ".page__content .diagram__traffic-grid > .diagram__connector::before",
+  ".page__content .diagram__auth-lane > .diagram__connector::before",
   ".page__content .diagram__cluster-grid--control",
   "grid-template-columns: repeat(3, minmax(0, 1fr));",
   ".page__content .diagram__cluster-grid--workers",

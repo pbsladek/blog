@@ -138,14 +138,14 @@ clusters:
       server: https://api.k8s.example.com:6443
       certificate-authority-data: ...
 users:
-  - name: operator@example.com
+  - name: paul@example.com
     user:
       token: ...
 contexts:
   - name: prod
     context:
       cluster: kubernetes
-      user: operator@example.com
+      user: paul@example.com
 ```
 
 That `server` URL is the API server address. In a single-node lab, it might be `https://192.0.2.10:6443`, pointing straight at the node running the API server. In a highly available cluster, it is usually a load balancer or DNS name in front of the API server instances on the three control-plane nodes.
