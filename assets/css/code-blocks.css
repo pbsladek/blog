@@ -171,12 +171,26 @@
   color: #cbd5e1;
 }
 
-.page__content :not(pre) > code {
+.page__content :not(pre) > code,
+.page__content :not(pre) > code.highlighter-rouge {
+  display: inline;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.35;
+  padding: 0.04em 0.24em;
   border: 1px solid rgba(148, 163, 184, 0.35);
   border-radius: 5px;
   color: #dbeafe;
   background: #172033;
   font-size: 0.86em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.page__content :not(pre) > code::before,
+.page__content :not(pre) > code::after {
+  content: none;
 }
 
 @media (max-width: 640px) {

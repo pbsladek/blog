@@ -3,5 +3,11 @@ vllm-inference:
   posts:
     - title: A Dense Introduction to vLLM Inference
       url: /2026/05/21/vllm-inference-101/
+    - title: Kubernetes Cluster Basics for vLLM
+      url: /2026/06/07/kubernetes-cluster-basics-for-vllm/
     - title: Running vLLM in Kubernetes
       url: /2026/06/14/vllm-kubernetes/
+    - title: Kubernetes RBAC Basics for vLLM Operators
+      url: /2026/06/18/kubernetes-rbac-basics-for-vllm/
+    - title: Securing vLLM on Kubernetes
+      url: /2026/06/20/vllm-kubernetes-security-rbac/

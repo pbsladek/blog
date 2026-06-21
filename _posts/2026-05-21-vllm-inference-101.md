@@ -100,7 +100,7 @@ The model produces scores for possible next tokens, not a finished sentence. Tho
 - **Where:** the serving engine applies the request's generation settings, such as temperature, top-p, top-k, maximum tokens, and sometimes a seed.
 - **Why:** always taking the most likely token can be repetitive, brittle, or too narrow. Sampling gives the model room to vary phrasing, explore alternatives, and avoid getting stuck in the same continuation.
 - **Impact on inference serving:** randomness makes retries, debugging, and load testing less predictable unless you log the prompt, model, generation settings, and seed if one is used. It can also change load indirectly: longer sampled answers consume more decode steps and more KV cache. Multi-output settings such as `n` and separate strategies such as beam search can multiply generated work even when the token choice itself is not random.
-- **Impact on agents:** stochasticity can change plans, tool calls, and stopping points from the same starting prompt. That can help exploration, but it is risky around commands, payments, record updates, and other side effects. Agent systems usually constrain randomness around tool use with lower temperature, structured outputs, validation, careful retries, and persistent state. Once an agent picks a token, calls a tool, or observes a result, that chosen path becomes part of the next prompt.
+- **Impact on agents:** stochasticity can change plans, tool calls, and stopping points from the same starting prompt. That can help exploration, but it is risky around commands, payments, record updates, and other side effects. This is where the distinction between generated text and action matters. The model is not conscious of consequences; it is choosing likely next tokens. Consequences such as deleting a file, sending an email, or calling a payment API exist in the surrounding system, not inside the token selection step. Agent systems usually constrain randomness around tool use with lower temperature, structured outputs, validation, permission checks, careful retries, and persistent state. Once an agent picks a token, calls a tool, or observes a result, that chosen path becomes part of the next prompt.
 
 For an autoregressive language model, inference has two phases worth knowing:
 
@@ -279,11 +279,13 @@ If `gpt-oss-20b` does not fit locally, or it fits but feels too slow, use a smal
 
 Simple starting points for local laptop runs:
 
-| Laptop memory | Try first | Model memory | If it feels slow |
-| --- | --- | --- | --- |
-| 16 GB | [`llama3.2:3b`](https://ollama.com/library/llama3.2) | ~2 GB | `llama3.2:1b` (~1.3 GB) |
-| 32 GB | [`gemma3:12b`](https://ollama.com/library/gemma3) or [`gpt-oss:20b`](https://ollama.com/library/gpt-oss) | ~8.1 GB / ~14 GB | `llama3.1:8b` (~4.9 GB) or `llama3.2:3b` (~2 GB) |
-| 48 GB | [`gemma3:27b`](https://ollama.com/library/gemma3) or `gpt-oss:20b` | ~17 GB / ~14 GB | `gemma3:12b` (~8.1 GB) |
+| Laptop memory (Mac M series) | Try first | Model memory | If it feels slow | Model memory |
+| --- | --- | --- | --- | --- |
+| 16 GB | [`llama3.2:3b`](https://ollama.com/library/llama3.2) | ~2 GB | `llama3.2:1b` | ~1.3 GB |
+| 32 GB | [`gemma3:12b`](https://ollama.com/library/gemma3)<br>[`gpt-oss:20b`](https://ollama.com/library/gpt-oss) | ~8.1 GB / ~14 GB | `llama3.1:8b`<br>`llama3.2:3b` | ~4.9 GB / ~2 GB |
+| 48 GB | [`gemma3:27b`](https://ollama.com/library/gemma3)<br>`gpt-oss:20b` | ~17 GB / ~14 GB | `gemma3:12b` | ~8.1 GB |
+
+If Ollama is not installed yet, start with the official [Ollama download page](https://ollama.com/download) or [quickstart guide](https://docs.ollama.com/quickstart).
 
 With Ollama:
 
@@ -332,7 +334,7 @@ vLLM targets a specific serving problem: keeping high-throughput LLM inference f
 
 Start with KV cache. PagedAttention is the memory-management technique that makes the cache easier to pack. Context length, prompt size, output length, and concurrent users all feed back into the same capacity problem.
 
-Start with one model, one clear workload, and one good dashboard. The Kubernetes deployment details are the next part of this series.
+Start with one model, one clear workload, and one good dashboard. The Kubernetes cluster model is the next part of this series.
 
 Further reading:
 

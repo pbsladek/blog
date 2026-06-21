@@ -28,11 +28,13 @@
 
 .page__content .diagram {
   box-sizing: border-box;
+  clear: both;
   width: min(980px, calc(100vw - 2rem));
   max-width: calc(100vw - 2rem);
   margin: 2rem 0 2.25rem 50%;
   padding: clamp(1rem, 2vw, 1.35rem);
   transform: translateX(-50%);
+  overflow: hidden;
   border: 1px solid var(--diagram-border);
   border-radius: 8px;
   color: var(--diagram-text);
@@ -179,6 +181,119 @@
   gap: 0.75rem;
 }
 
+.page__content .diagram__grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.page__content .diagram__grid--stack {
+  grid-template-columns: 1fr;
+}
+
+.page__content .diagram__grid > .diagram__node {
+  width: 100%;
+  min-width: 0;
+}
+
+.page__content .diagram__traffic-grid,
+.page__content .diagram__dns-grid {
+  display: grid;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+}
+
+.page__content .diagram__traffic-grid {
+  grid-template-columns: minmax(0, 1fr) 2.25rem minmax(0, 0.82fr) 2.25rem minmax(0, 1fr);
+}
+
+.page__content .diagram__dns-grid {
+  grid-template-columns: minmax(0, 1fr) 2.25rem minmax(0, 1fr);
+}
+
+.page__content .diagram__traffic-grid > .diagram__group,
+.page__content .diagram__dns-grid > .diagram__group {
+  width: 100%;
+  min-width: 0;
+}
+
+.page__content .diagram__transit,
+.page__content .diagram__dns-column {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.page__content .diagram__transit > .diagram__node,
+.page__content .diagram__dns-column > .diagram__node {
+  width: 100%;
+  min-width: 0;
+}
+
+.page__content .diagram__cluster {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+}
+
+.page__content .diagram__cluster-group {
+  width: min(100%, 54rem);
+}
+
+.page__content .diagram__cluster-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.page__content .diagram__cluster-grid--control {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.page__content .diagram__cluster-grid--workers {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.page__content .diagram__worker-pool {
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--diagram-border);
+  border-radius: 8px;
+  background: var(--diagram-surface);
+}
+
+.page__content .diagram__worker-pool--accent {
+  border-color: var(--diagram-accent);
+  background: var(--diagram-accent-soft);
+}
+
+.page__content .diagram__pool-title {
+  color: var(--diagram-text);
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.page__content .diagram__pool-items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.page__content .diagram__pool-items--stack {
+  grid-template-columns: 1fr;
+}
+
+.page__content .diagram__node--compact {
+  min-width: 0;
+  min-height: 4.25rem;
+  padding: 0.7rem;
+  font-size: 0.96rem;
+}
+
 .page__content .diagram__connector {
   position: relative;
   flex: 0 0 2.25rem;
@@ -284,6 +399,194 @@
   color: var(--diagram-success);
 }
 
+.page__content .diagram__probe-model {
+  display: grid;
+  gap: 1rem;
+}
+
+.page__content .diagram__probe-case {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.95rem;
+  border: 1px solid var(--diagram-border);
+  border-radius: 8px;
+  background: var(--diagram-surface);
+}
+
+.page__content .diagram__probe-axis,
+.page__content .diagram__probe-row {
+  display: grid;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.page__content .diagram__probe-row {
+  grid-template-columns: minmax(8.5rem, 0.38fr) minmax(0, 1fr);
+}
+
+.page__content .diagram__probe-axis {
+  grid-template-columns: minmax(8.5rem, 0.38fr) repeat(5, minmax(0, 1fr));
+  color: var(--diagram-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.page__content .diagram__probe-axis::before {
+  content: "";
+}
+
+.page__content .diagram__probe-axis span {
+  grid-row: 1;
+}
+
+.page__content .diagram__probe-axis span:nth-child(1) {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.page__content .diagram__probe-axis span:nth-child(2) {
+  grid-column: 3;
+  justify-self: center;
+}
+
+.page__content .diagram__probe-axis span:nth-child(3) {
+  grid-column: 4;
+  justify-self: center;
+}
+
+.page__content .diagram__probe-axis span:nth-child(4) {
+  grid-column: 5;
+  justify-self: center;
+}
+
+.page__content .diagram__probe-axis span:nth-child(5) {
+  grid-column: 6;
+  justify-self: end;
+}
+
+.page__content .diagram__probe-label {
+  min-width: 0;
+  color: var(--diagram-text);
+  font-size: 0.9rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.page__content .diagram__probe-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 0.4rem;
+  align-items: center;
+  min-width: 0;
+  min-height: 2.6rem;
+  padding: 0.35rem 0;
+}
+
+.page__content .diagram__probe-segment {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+.page__content .diagram__probe-segment {
+  grid-column: var(--start) / span var(--span);
+  min-width: 0;
+  padding: 0.28rem 0.42rem;
+  border: 1px solid var(--diagram-border);
+  border-radius: 999px;
+  color: var(--diagram-text);
+  background:
+    linear-gradient(rgba(148, 163, 184, 0.08), rgba(148, 163, 184, 0.08)),
+    var(--diagram-surface-strong);
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.page__content .diagram__probe-segment--work {
+  border-color: var(--diagram-accent);
+  background:
+    linear-gradient(var(--diagram-accent-soft), var(--diagram-accent-soft)),
+    var(--diagram-surface);
+}
+
+.page__content .diagram__probe-segment--warn {
+  border-color: #f59e0b;
+  background:
+    linear-gradient(rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.18)),
+    var(--diagram-surface);
+}
+
+.page__content .diagram__probe-segment--good {
+  border-color: rgba(134, 239, 172, 0.58);
+  background:
+    linear-gradient(rgba(134, 239, 172, 0.14), rgba(134, 239, 172, 0.14)),
+    var(--diagram-surface);
+}
+
+.page__content .diagram__probe-segment--danger {
+  border-color: #f87171;
+  background:
+    linear-gradient(rgba(248, 113, 113, 0.18), rgba(248, 113, 113, 0.18)),
+    var(--diagram-surface);
+}
+
+.page__content .diagram__probe-segment--muted {
+  color: var(--diagram-muted);
+  background:
+    linear-gradient(rgba(100, 116, 139, 0.14), rgba(100, 116, 139, 0.14)),
+    var(--diagram-surface);
+}
+
+@media (max-width: 1040px) {
+  .page__content .diagram__traffic-grid,
+  .page__content .diagram__dns-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .page__content .diagram__traffic-grid > .diagram__group,
+  .page__content .diagram__dns-grid > .diagram__group,
+  .page__content .diagram__transit,
+  .page__content .diagram__dns-column {
+    width: min(100%, 34rem);
+  }
+
+  .page__content .diagram__grid--two {
+    grid-template-columns: 1fr;
+  }
+
+  .page__content .diagram__traffic-grid > .diagram__connector,
+  .page__content .diagram__dns-grid > .diagram__connector {
+    width: 1.2rem;
+    height: 1.5rem;
+  }
+
+  .page__content .diagram__traffic-grid > .diagram__connector::before,
+  .page__content .diagram__dns-grid > .diagram__connector::before {
+    top: 0;
+    bottom: 0.32rem;
+    left: 50%;
+    width: 2px;
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  .page__content .diagram__traffic-grid > .diagram__connector::after,
+  .page__content .diagram__dns-grid > .diagram__connector::after {
+    top: auto;
+    right: auto;
+    bottom: 0.05rem;
+    left: 50%;
+    transform: translateX(-50%) rotate(135deg);
+  }
+}
+
 @media (max-width: 760px) {
   .page__content .diagram {
     width: 100vw;
@@ -353,7 +656,59 @@
   }
 
   .page__content .diagram__memory-items,
+  .page__content .diagram__grid--two,
+  .page__content .diagram__traffic-grid,
+  .page__content .diagram__dns-grid,
+  .page__content .diagram__cluster-grid,
+  .page__content .diagram__pool-items,
   .page__content .diagram__worker-grid {
     grid-template-columns: 1fr;
+  }
+
+  .page__content .diagram__probe-axis,
+  .page__content .diagram__probe-row {
+    gap: 0.35rem;
+  }
+
+  .page__content .diagram__probe-row {
+    grid-template-columns: 1fr;
+  }
+
+  .page__content .diagram__probe-axis {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .page__content .diagram__probe-axis::before {
+    content: none;
+  }
+
+  .page__content .diagram__probe-axis span:nth-child(1) {
+    grid-column: 1;
+  }
+
+  .page__content .diagram__probe-axis span:nth-child(2) {
+    grid-column: 2;
+  }
+
+  .page__content .diagram__probe-axis span:nth-child(3) {
+    grid-column: 3;
+  }
+
+  .page__content .diagram__probe-axis span:nth-child(4) {
+    grid-column: 4;
+  }
+
+  .page__content .diagram__probe-axis span:nth-child(5) {
+    grid-column: 5;
+  }
+
+  .page__content .diagram__probe-track {
+    min-height: 3.1rem;
+  }
+
+  .page__content .diagram__probe-segment {
+    padding-right: 0.3rem;
+    padding-left: 0.3rem;
+    font-size: 0.64rem;
   }
 }
