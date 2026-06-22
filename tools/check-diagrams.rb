@@ -77,6 +77,12 @@ assert(
   "expected 2 diagrams in the Kubernetes RBAC basics post, found #{rbac_figure_count}"
 )
 
+security_figure_count = security_html.scan(/<figure class="diagram(?: [^"]*)?" aria-labelledby="/).length
+assert(
+  security_figure_count == 1,
+  "expected 1 diagram in the vLLM security post, found #{security_figure_count}"
+)
+
 serving_match = vllm_html.match(/<figure class="diagram diagram--flow" aria-labelledby="serving-path-diagram">([\s\S]*?)<\/figure>/)
 assert(serving_match, "missing serving path diagram")
 serving = serving_match[1]
@@ -447,20 +453,113 @@ assert(
 [
   "Securing vLLM on Kubernetes",
   "The RBAC post covered Kubernetes management access",
-  "Kubernetes RBAC controls who can manage the serving platform. It does not decide who can use a model.",
-  "Model access belongs above Kubernetes RBAC",
-  "client identity -&gt; gateway auth -&gt; model authorization -&gt; router -&gt; worker",
+  "Kubernetes RBAC controls who can manage the serving platform. It does not decide who can use a model, issue API keys, enforce tenant limits, protect prompt data, or stop an agent from turning model output into an unsafe action.",
+  "Model-serving boundary",
+  "client -&gt; gateway or LLM gateway -&gt; model policy -&gt; router -&gt; vLLM worker",
+  "Who can call <code class=\"language-plaintext highlighter-rouge\">general-chat</code> or <code class=\"language-plaintext highlighter-rouge\">finance-summary</code>",
+  "Which agent tools can run and under whose authority",
+  "API keys and user-facing access",
+  "you need key issuance, rotation, revocation, owner metadata",
+  "model allowlists",
+  "vLLM has a built-in <code class=\"language-plaintext highlighter-rouge\">--api-key</code> server option.",
+  "It is not a user-facing key-management system",
+  "Common out-of-the-box options:",
+  "AWS API Gateway usage plans/API keys, Azure API Management subscriptions, Google Cloud API Gateway API keys",
+  "Kong Gateway key-auth, Apache APISIX key-auth",
+  "LiteLLM Proxy virtual keys, budgets, model access, spend tracking, and <code class=\"language-plaintext highlighter-rouge\">/key/generate</code>",
+  "Store only hashed keys, use short prefixes for lookup, support rotation/revocation",
+  "API keys are bearer secrets, not strong user identity.",
+  "The router or LLM gateway should reject requests for models outside the key",
+  "should not be able to call <code class=\"language-plaintext highlighter-rouge\">finance-summary</code> by changing the <code class=\"language-plaintext highlighter-rouge\">model</code> field",
+  "Prompt injection and agent boundaries",
+  "Once model output can drive retrieval, code execution, browsers, ticket systems, databases, or cloud APIs, you are securing an agent system.",
+  "A vLLM worker receives tokens and returns tokens.",
+  "Indirect prompt injection is worse for agents",
+  "Do not put secrets, raw credentials, or broad internal data into model context",
+  "Put tool calls through a policy service, not directly from model text to execution.",
+  "agent service -&gt; policy check -&gt; tool executor -&gt; external system",
+  "The vLLM worker should not have cloud admin credentials, database write credentials, shell access to the host, or broad outbound internet access.",
+  "This is how you keep a model from “running crazy”: do not let text directly become authority.",
+  "Istio Gateway API at the edge",
+  "GatewayClass -&gt; Gateway -&gt; HTTPRoute -&gt; Service -&gt; router Pod",
+  "Istio supports Gateway API and has said it intends to make it the default traffic-management API.",
+  "Gateway API resources are CRDs and are not installed by default on most clusters.",
+  "<span class=\"na\">gatewayClassName</span><span class=\"pi\">:</span> <span class=\"s\">istio</span>",
+  "<span class=\"na\">certificateRefs</span><span class=\"pi\">:</span>",
+  "<span class=\"na\">kind</span><span class=\"pi\">:</span> <span class=\"s\">HTTPRoute</span>",
+  "For a raw TCP port, use <code class=\"language-plaintext highlighter-rouge\">TCPRoute</code> instead of an Istio <code class=\"language-plaintext highlighter-rouge\">VirtualService</code>.",
+  "<span class=\"s\">inference-tcp-gateway</span>",
+  "TCPRoute is a Gateway API experimental-channel resource.",
+  "<span class=\"na\">kind</span><span class=\"pi\">:</span> <span class=\"s\">TCPRoute</span>",
+  "<span class=\"na\">gateway-access</span><span class=\"pi\">:</span> <span class=\"s\">inference</span>",
+  "Packets do not travel to an <code class=\"language-plaintext highlighter-rouge\">HTTPRoute</code>, <code class=\"language-plaintext highlighter-rouge\">TCPRoute</code>, or old <code class=\"language-plaintext highlighter-rouge\">VirtualService</code> object.",
+  "The certificate Secret belongs in the namespace where the <code class=\"language-plaintext highlighter-rouge\">Gateway</code> reads it.",
   "NetworkPolicy: default-deny the model pods",
-  "Admin endpoints and metrics",
+  "Runtime isolation: containers, gVisor, Kata, and VMs",
+  "Kubernetes <code class=\"language-plaintext highlighter-rouge\">RuntimeClass</code> is the standard API for selecting a different container runtime configuration per Pod.",
+  "spec.runtimeClassName",
+  "<span class=\"na\">runtimeClassName</span><span class=\"pi\">:</span> <span class=\"s\">kata</span>",
+  "Standard container",
+  "gVisor",
+  "Kata Containers",
+  "Dedicated VM/node pool",
+  "Separate cluster/account/project",
+  "I would not start by forcing the GPU worker itself into a sandbox runtime.",
+  "Runtime isolation does not solve prompt injection.",
   "Securing vLLM on Kubernetes is not one RBAC file. It is a layered access model."
 ].each do |needle|
   assert(security_html.include?(needle), "vLLM security post missing #{needle.inspect}")
 end
 
+gateway_api_match = security_html.match(/<figure class="diagram" aria-labelledby="gateway-api-vllm-flow-diagram">([\s\S]*?)<\/figure>/)
+assert(gateway_api_match, "missing Gateway API vLLM flow diagram")
+gateway_api = gateway_api_match[1]
+
+assert(gateway_api.include?("diagram__auth-flow"), "Gateway API diagram must use the auth-flow layout")
+assert(gateway_api.include?("diagram__auth-lane"), "Gateway API diagram must use auth lanes")
+assert(gateway_api.include?("diagram__auth-stack"), "Gateway API diagram must stack route and certificate nodes")
+
+assert(
+  ordered?(
+    gateway_api,
+    [
+      "Gateway API traffic and certificate flow",
+      "Client",
+      "Istio ingress gateway",
+      "LoadBalancer Service",
+      "Envoy gateway proxy",
+      "Route to vLLM",
+      "Gateway listener",
+      "HTTPRoute / TCPRoute",
+      "old Istio API: VirtualService",
+      "vLLM router Service and Pod",
+      "cert-manager",
+      "Certificate resource",
+      "Kubernetes Secret",
+      "serves the Secret named in certificateRefs"
+    ]
+  ),
+  "Gateway API diagram no longer shows client -> gateway proxy -> route -> vLLM plus cert-manager -> Secret -> Gateway listener"
+)
+
 [
-  "## Example RBAC: developers can view, operators can deploy",
-  "## Example RBAC: router service discovery",
-  "## Namespace boundaries"
+  "Two planes",
+  "Trust boundaries",
+  "RBAC is not model authorization",
+  "Model access belongs above Kubernetes RBAC",
+  "Admission controls and deployment policy",
+  "Reference policy shape",
+  "Failure modes to avoid",
+  "Production checklist",
+  "UDPRoute",
+  "UDP",
+  "router-udp",
+  "9001",
+  "L4",
+  "l4",
+  "Example RBAC: developers can view, operators can deploy",
+  "Example RBAC: router service discovery",
+  "Namespace boundaries"
 ].each do |needle|
   assert(!security_html.include?(needle), "vLLM security post should not include RBAC basics section #{needle.inspect}")
 end

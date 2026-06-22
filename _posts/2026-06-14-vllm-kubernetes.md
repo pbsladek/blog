@@ -100,7 +100,41 @@ The `nvidia.com/gpu: "1"` line depends on the NVIDIA device plugin, or an equiva
 
 `runtimeClassName` is a different thing. A runtime class selects the container runtime handler for the pod, for example an NVIDIA-aware runtime handler on clusters that are configured that way. It does not advertise GPU capacity by itself. Think of the device plugin as "Kubernetes can schedule GPU resources" and the runtime class as "this pod should run with the runtime setup that can expose those GPUs correctly." Some clusters make the NVIDIA runtime the default for GPU nodes, so you only request `nvidia.com/gpu`. Others require both a GPU resource request and something like `runtimeClassName: nvidia` at the pod spec level.
 
-## Using replicas without dropping requests
+MIG, or Multi-Instance GPU, adds another layer. On supported NVIDIA GPUs, MIG partitions one physical GPU into smaller isolated GPU instances. Kubernetes only sees those slices after the node has been configured for MIG and the NVIDIA device plugin is running with a MIG strategy.
+
+The common strategies are:
+
+| MIG strategy | What Kubernetes sees | When it fits |
+| --- | --- | --- |
+| `none` | Full GPUs as `nvidia.com/gpu` | Default for whole-GPU vLLM workers and multi-GPU tensor/pipeline parallelism. |
+| `single` | MIG instances exposed as `nvidia.com/gpu` when the node uses one MIG profile shape | Useful when a node is dedicated to one slice size, such as all `1g.10gb` instances. The pod spec can still request `nvidia.com/gpu: 1`, but that "GPU" is a MIG slice. |
+| `mixed` | Profile-specific resources such as `nvidia.com/mig-1g.10gb`, `nvidia.com/mig-2g.20gb`, or `nvidia.com/mig-3g.40gb` | Useful when the cluster has multiple MIG slice sizes and workloads need to ask for a specific profile. |
+
+With the NVIDIA GPU Operator, MIG Manager can handle the node-side MIG configuration. For example, an operator can enable a MIG strategy during install and then label a node with a profile such as `nvidia.com/mig.config=all-1g.10gb` or `nvidia.com/mig.config=all-balanced`. The device plugin and GPU feature discovery then expose allocatable resources and labels such as `nvidia.com/mig.config.state=success`, `nvidia.com/mig.strategy=mixed`, and `nvidia.com/mig-1g.10gb.count`.
+
+For vLLM, MIG is mainly a capacity-partitioning choice. A MIG slice looks like a smaller CUDA device to the container. vLLM does not need a special "MIG mode" flag, but the model, context length, KV cache, and concurrency have to fit inside that slice. That makes MIG useful for smaller models, embeddings, low-QPS tenants, eval workers, or dev/test pools on expensive GPUs. It is usually the wrong first move for a large dense model that already needs the full GPU, NVLink bandwidth, or multi-GPU tensor parallelism.
+
+Example pod resource requests:
+
+```yaml
+# Whole GPU or MIG exposed through the "single" strategy.
+resources:
+  limits:
+    nvidia.com/gpu: 1
+  requests:
+    nvidia.com/gpu: 1
+---
+# Specific MIG profile exposed through the "mixed" strategy.
+resources:
+  limits:
+    nvidia.com/mig-1g.10gb: 1
+  requests:
+    nvidia.com/mig-1g.10gb: 1
+```
+
+Changing MIG geometry is node maintenance. Existing GPU workloads need to be drained or terminated before the node can be repartitioned, and some cloud environments require a reboot. Plan MIG profiles as part of capacity planning instead of changing them casually during serving traffic.
+
+## Replicas, placement, and probes
 
 Multiple replicas of the same model help when each replica has enough GPU capacity to serve real traffic. In practice that means one vLLM pod per GPU, all serving the same model name, behind one Service or router.
 
@@ -115,6 +149,20 @@ So replicas give you request-level parallelism: three pods can handle three diff
 | **Pipeline parallelism** | One model instance across stages | Splits model layers/stages across GPUs | Does not remove coordination cost |
 
 Use replicas when one GPU can hold the model and you need more request capacity. Use tensor or pipeline parallelism when one model instance needs more than one GPU. Sometimes you use both: each replica is itself a multi-GPU vLLM deployment.
+
+For that to work, a few layers have to line up:
+
+| Layer | What has to be true |
+| --- | --- |
+| **Kubernetes GPU support** | GPU nodes need NVIDIA drivers, the NVIDIA container runtime/toolkit, and the NVIDIA device plugin or equivalent GPU device plugin advertising `nvidia.com/gpu`. The Pod must request the GPU count it needs. |
+| **MIG partitioning** | If the node uses MIG, the slice profile is part of capacity. A pod might request `nvidia.com/gpu` under the `single` strategy or a profile-specific resource such as `nvidia.com/mig-1g.10gb` under the `mixed` strategy. |
+| **Scheduling** | A single-pod multi-GPU replica must land on a node with enough free GPUs. Use node labels, taints/tolerations, affinity, and separate GPU pools so the scheduler places it on the right hardware. |
+| **vLLM configuration** | vLLM needs explicit parallelism flags such as `--tensor-parallel-size 4`, `--pipeline-parallel-size 2`, and, for multi-node deployments, a distributed executor such as Ray or the multi-node multiprocessing settings. |
+| **GPU interconnect** | NVLink is not a Kubernetes requirement, but it helps a lot for tensor parallelism inside one node because the GPUs communicate constantly. PCIe can work, but measure it. |
+| **Node-to-node network** | Multi-node model parallelism needs fast, low-latency networking. InfiniBand/RDMA and NCCL tuning matter for serious cross-node tensor parallelism; falling back to raw TCP sockets can work mechanically but is usually not what you want for performance. |
+| **Model files** | Every worker process needs the same model path or access to the same weights. Pre-download weights on each node, use a shared filesystem that can handle the load, or make the download/sync part of startup. |
+
+The device plugin does not configure tensor or pipeline parallelism. It only makes GPUs visible as schedulable resources and injects the selected devices into the container. vLLM still needs to be started with the right parallelism settings, and the cluster still needs the hardware topology and network to make those settings practical.
 
 The simple Kubernetes version is:
 
@@ -415,7 +463,7 @@ The router also gives you a cleaner place to put inference-facing behavior: mode
 
 To keep replicas effective:
 
-- Give every replica the same served model name so clients do not care which pod answered.
+- Keep replicas interchangeable: same served model name, compatible model files, compatible tokenizer, and the same public behavior. If replicas differ, model them as separate backends instead of hiding the difference behind one Service.
 - Use readiness probes so cold or broken pods are removed from the endpoint list.
 - Use graceful shutdown so in-flight streaming requests get time to finish during rollouts.
 - Set client and gateway timeouts long enough for streaming responses.
@@ -440,41 +488,6 @@ Plan for these failure modes before users hit them:
 - **Client retries after partial streaming:** the replacement request can duplicate work and confuse the user experience.
 - **GPU OOM:** the process may fail the request, restart, or become unhealthy depending on how the failure surfaces. Watch memory pressure before it becomes a user-facing outage.
 - **Cold model download during deploy:** a new pod may spend minutes pulling weights before it can serve anything. Cache weights or plan rollout timing.
-
-## What to watch in production
-
-The production questions are direct:
-
-- Are requests waiting in a queue?
-- Is decode throughput high enough?
-- Is time-to-first-token acceptable?
-- Is GPU memory full because of weights, KV cache, or fragmentation?
-- Are long-context requests crowding out short ones?
-- Are rollouts causing cold-start latency spikes?
-- Are clients retrying and accidentally multiplying load?
-
-Useful metric categories:
-
-- **Queue depth:** waiting requests or waiting sequences.
-- **Running load:** active/running requests and active sequences.
-- **TTFT:** time from request arrival to first streamed token.
-- **Inter-token latency:** how fast tokens arrive after streaming starts.
-- **Prompt throughput:** prompt/prefill tokens processed per second.
-- **Generation throughput:** decode/output tokens generated per second.
-- **GPU KV cache usage:** cache blocks used/free, cache utilization, or related memory pressure.
-- **Request outcomes:** success, cancellation, timeout, and error counts.
-- **Scheduler pressure:** pending work, preemptions, or signs that long requests are crowding the batch.
-
-For Kubernetes specifically, also watch:
-
-- GPU node capacity and scheduling failures.
-- Model weight download time.
-- Persistent volume performance if weights are cached.
-- Readiness probes that only pass after the model is actually usable.
-- Pod disruption budgets for serving capacity.
-- Autoscaling signals that reflect inference pressure, not just CPU.
-
-LLM serving does not scale like a typical web API. CPU, request rate, and latency are not enough. CPU can look calm while the GPU is out of memory, the decode queue is backed up, or one long-context request is eating the KV cache. The expensive resources are GPU memory, GPU compute, and the scheduling policy that decides which tokens get generated next.
 
 ## Autoscaling vLLM
 
@@ -619,47 +632,23 @@ Add a negative test too. Set `terminationGracePeriodSeconds` too low in a stagin
 
 The useful metrics during this test are request errors, canceled requests, active streams per replica, router selected-backend counts, pod termination time, EndpointSlice readiness changes, and the gap between `SIGTERM` and process exit. If you cannot observe those, you cannot really know whether scale-down is zero-downtime.
 
-## Production checklist
-
-Before calling a vLLM deployment production, I would want at least this:
-
-- Pin the vLLM image tag and digest. Do not deploy `latest` on purpose.
-- Set GPU requests/limits and use the right node selectors, tolerations, or runtime class for your cluster.
-- Use startup, readiness, and liveness probes with timings that match model load time.
-- Add graceful shutdown and enough termination time for streaming requests.
-- Use a PodDisruptionBudget so maintenance cannot remove too much serving capacity.
-- Decide where model weights live and how new pods warm them quickly.
-- Put realistic request, stream, and gateway timeouts in front of the service.
-- Scrape vLLM metrics and alert on queue depth, TTFT, token throughput, request errors, and GPU memory pressure.
-- Autoscale from inference signals, not plain CPU.
-- Load test with realistic prompt lengths, output lengths, concurrency, and streaming clients.
-- Decide retry policy explicitly. Failed prefill and failed mid-stream are not the same thing.
-- Keep a rollback path for model, image, and router changes.
-
-## Common misconceptions
-
-- **"Replicas split one request."** They do not. One HTTP request goes to one selected pod unless you are using model parallelism inside a deployment.
-- **"FastAPI is the fleet load balancer."** It is the pod-local HTTP server. Fleet routing happens before the request reaches a specific vLLM pod.
-- **"CPU is the bottleneck."** Sometimes, but GPU memory, GPU compute, KV cache pressure, and scheduling are usually the first things to inspect.
-- **"Bigger context is always better."** Bigger context can reduce concurrency and make KV cache pressure worse.
-- **"More replicas fix routing."** More replicas help only if traffic reaches ready, healthy, not-overloaded pods.
-- **"Quantization is free."** Quantization can reduce memory, but it changes the storage and math tradeoffs. Measure quality and latency.
-- **"A Kubernetes Service knows model load."** It mostly knows endpoints. It does not understand tokens, cache, or model-specific queues.
-- **"Retrying is harmless."** Retrying can multiply load, especially if clients retry while the original request is still running.
-
 ## The takeaway
 
-vLLM targets a specific serving problem: keeping high-throughput LLM inference from wasting GPU memory and starving the batch scheduler.
+Running vLLM on Kubernetes is mostly about making the cluster tell the truth about serving capacity.
 
-Start with KV cache. PagedAttention is the memory-management technique that makes the cache easier to pack. Kubernetes lets you run the service with scheduling, rollouts, and health checks, but it does not remove the need to measure token throughput, queueing, latency, and GPU memory.
+Kubernetes can schedule GPU pods, restart failed containers, remove unready endpoints, and roll deployments. It does not know whether a model has finished loading, whether the KV cache is full, whether one replica is backed up, or whether a stream is still active during scale-down. You have to wire those signals into probes, routing, metrics, rollout policy, and autoscaling.
 
-Start with one model, one GPU, one clear workload, and one good dashboard. Then scale from evidence.
+For vLLM, the practical path is: request the right GPU or MIG resources, keep replicas interchangeable, make readiness wait for real model availability, route with inference-aware signals when simple Services are not enough, scale up from queue pressure, scale down slowly with draining, and load test the shutdown path before users depend on it.
 
 Further reading:
 
 - [Efficient Memory Management for Large Language Model Serving with PagedAttention](https://arxiv.org/abs/2309.06180)
 - [vLLM Online Serving](https://docs.vllm.ai/en/stable/serving/online_serving/)
+- [vLLM Parallelism and Scaling](https://docs.vllm.ai/en/stable/serving/parallelism_scaling/)
 - [vLLM Production Stack](https://docs.vllm.ai/en/stable/deployment/integrations/production-stack/)
 - [vLLM Optimization and Tuning](https://docs.vllm.ai/en/stable/configuration/optimization/)
 - [vLLM Production Metrics](https://docs.vllm.ai/en/stable/usage/metrics/)
 - [Kubernetes Horizontal Pod Autoscaling](https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/)
+- [NVIDIA Kubernetes device plugin](https://github.com/NVIDIA/k8s-device-plugin)
+- [NVIDIA MIG support in Kubernetes](https://docs.nvidia.com/datacenter/cloud-native/kubernetes/latest/index.html)
+- [NVIDIA GPU Operator MIG](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-operator-mig.html)
