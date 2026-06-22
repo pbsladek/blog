@@ -5,15 +5,25 @@ services:
       dockerfile: Dockerfile.dev
       args:
         RUBY_VERSION: 3.3.0
-    command: sh -lc 'bundle exec jekyll serve --host 0.0.0.0 --port 4100 --baseurl "" --livereload --livereload-port "$${LIVERELOAD_PORT:-35729}" --force_polling'
+    command: >-
+      sh -lc 'printf "url: \"http://%s:%s\"\nbaseurl: \"\"\n"
+      "$${JEKYLL_HOST:-127.0.0.1}" "$${JEKYLL_PORT:-4100}" > /tmp/jekyll-dev.yml
+      && bundle exec jekyll serve --config _config.yml,/tmp/jekyll-dev.yml
+      --host 0.0.0.0
+      --port "$${JEKYLL_PORT:-4100}"
+      --livereload
+      --livereload-port "$${LIVERELOAD_PORT:-35729}"
+      --force_polling'
     ports:
-      - "${JEKYLL_PORT:-4100}:4100"
-      - "${LIVERELOAD_PORT:-35729}:${LIVERELOAD_PORT:-35729}"
+      - "${JEKYLL_HOST:-127.0.0.1}:${JEKYLL_PORT:-4100}:${JEKYLL_PORT:-4100}"
+      - "${JEKYLL_HOST:-127.0.0.1}:${LIVERELOAD_PORT:-35729}:${LIVERELOAD_PORT:-35729}"
     volumes:
       - .:/usr/src/app
       - bundle:/bundle
     environment:
       JEKYLL_ENV: development
+      JEKYLL_HOST: "${JEKYLL_HOST:-127.0.0.1}"
+      JEKYLL_PORT: "${JEKYLL_PORT:-4100}"
       LIVERELOAD_PORT: "${LIVERELOAD_PORT:-35729}"
 
 volumes:

@@ -26,11 +26,11 @@ help:
 dev:
 	@set -e ; \
 	$(DOCKER_COMPOSE) down --remove-orphans >/dev/null 2>&1 || true ; \
-	PORT="$$(ruby -rsocket -e 'host = "$(JEKYLL_HOST)"; start = "$(JEKYLL_PORT)".to_i; limit = start + 100; port = (start..limit).find { |candidate| begin server = TCPServer.new(host, candidate); server.close; true; rescue SystemCallError; false; end }; abort "No free Jekyll port found from #{start} to #{limit}" unless port; puts port')" ; \
-	LR_PORT="$$(ruby -rsocket -e 'host = "$(JEKYLL_HOST)"; start = "$(LIVERELOAD_PORT)".to_i; limit = start + 100; port = (start..limit).find { |candidate| begin server = TCPServer.new(host, candidate); server.close; true; rescue SystemCallError; false; end }; abort "No free LiveReload port found from #{start} to #{limit}" unless port; puts port')" ; \
+	PORT="$$(ruby tools/find-free-port.rb "$(JEKYLL_HOST)" "$(JEKYLL_PORT)")" ; \
+	LR_PORT="$$(ruby tools/find-free-port.rb "$(JEKYLL_HOST)" "$(LIVERELOAD_PORT)")" ; \
 	printf "%s\n" "Serving Docker Jekyll at http://$(JEKYLL_HOST):$$PORT/" ; \
 	printf "%s\n" "Docker LiveReload on http://$(JEKYLL_HOST):$$LR_PORT" ; \
-	JEKYLL_PORT=$$PORT LIVERELOAD_PORT=$$LR_PORT $(DOCKER_COMPOSE) up --build site
+	JEKYLL_HOST="$(JEKYLL_HOST)" JEKYLL_PORT=$$PORT LIVERELOAD_PORT=$$LR_PORT $(DOCKER_COMPOSE) up --build site
 
 build:
 	$(DOCKER_COMPOSE) run --rm site bundle exec jekyll build

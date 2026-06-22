@@ -8,6 +8,9 @@
   --site-link: #8cd2d5;
   --site-link-hover: #b7f1f3;
   --site-focus: rgba(140, 210, 213, 0.28);
+  --site-table-header-bg: #2e3440;
+  --site-table-row-bg: #252a34;
+  --site-table-row-alt-bg: #2a303a;
 }
 
 html[data-theme="dark"] {
@@ -25,6 +28,9 @@ html[data-theme="light"] {
   --site-link: #0f6b78;
   --site-link-hover: #074e5a;
   --site-focus: rgba(15, 107, 120, 0.24);
+  --site-table-header-bg: #e7edf5;
+  --site-table-row-bg: #ffffff;
+  --site-table-row-alt-bg: #f6f9fc;
   --code-bg: #111827;
   --code-surface: #0b1120;
   --code-border: #334155;
@@ -57,11 +63,13 @@ html[data-theme="light"] .page__footer {
 html[data-theme="light"] .site-title,
 html[data-theme="light"] .greedy-nav a,
 html[data-theme="light"] .page__title,
+html[data-theme="light"] .page__title a,
 html[data-theme="light"] .archive__item-title,
 html[data-theme="light"] .archive__item-title a,
 html[data-theme="light"] .archive__subtitle,
 html[data-theme="light"] .author__name {
   color: var(--site-text);
+  opacity: 1;
 }
 
 html[data-theme="light"] .page__content {
@@ -93,6 +101,28 @@ html[data-theme="light"] .page__content :not(pre) > code {
   border-color: rgba(15, 107, 120, 0.24);
   color: #0f5260;
   background: rgba(15, 107, 120, 0.09);
+}
+
+.page__content table {
+  border-color: var(--site-border);
+  color: var(--site-text);
+  background: var(--site-table-row-bg);
+}
+
+.page__content table th {
+  border-color: var(--site-border);
+  color: var(--site-text);
+  background: var(--site-table-header-bg);
+}
+
+.page__content table td {
+  border-color: var(--site-border);
+  color: var(--site-text);
+  background: var(--site-table-row-bg);
+}
+
+.page__content table tr:nth-child(even) td {
+  background: var(--site-table-row-alt-bg);
 }
 
 html[data-theme="light"] .archive__item {
