@@ -57,11 +57,17 @@ html[data-theme="light"] .page__footer {
 html[data-theme="light"] .site-title,
 html[data-theme="light"] .greedy-nav a,
 html[data-theme="light"] .page__title,
+html[data-theme="light"] .page__title a,
 html[data-theme="light"] .archive__item-title,
 html[data-theme="light"] .archive__item-title a,
 html[data-theme="light"] .archive__subtitle,
 html[data-theme="light"] .author__name {
   color: var(--site-text);
+}
+
+html[data-theme="light"] .page__title a:hover,
+html[data-theme="light"] .page__title a:focus {
+  color: var(--site-link-hover);
 }
 
 html[data-theme="light"] .page__content {
@@ -93,6 +99,17 @@ html[data-theme="light"] .page__content :not(pre) > code {
   border-color: rgba(15, 107, 120, 0.24);
   color: #0f5260;
   background: rgba(15, 107, 120, 0.09);
+}
+
+html[data-theme="light"] .page__content table,
+html[data-theme="light"] .page__content table th,
+html[data-theme="light"] .page__content table td {
+  border-color: var(--site-border);
+}
+
+html[data-theme="light"] .page__content table th {
+  color: var(--site-text);
+  background: var(--site-surface-soft);
 }
 
 html[data-theme="light"] .archive__item {
@@ -166,6 +183,581 @@ html[data-theme="light"] .project-card {
   border-left: 4px solid var(--site-link);
   color: var(--site-text);
   background: rgba(140, 210, 213, 0.08);
+}
+
+.page__content .formula-stack {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 72ch;
+  margin: 1rem 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--site-border);
+  border-radius: 8px;
+  color: var(--site-text);
+  background: var(--site-surface-raised);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+}
+
+.page__content .formula-stack strong {
+  color: var(--site-link);
+  font-weight: 700;
+}
+
+.page__content .housing-stress {
+  width: min(980px, calc(100vw - 2rem));
+  margin: 2rem 0 2.25rem 50%;
+  transform: translateX(-50%);
+  font-variant-numeric: tabular-nums;
+}
+
+.page__content .housing-stress__header {
+  margin-bottom: 1rem;
+}
+
+.page__content .housing-stress__header h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+}
+
+.page__content .housing-stress__header p {
+  max-width: 74ch;
+  margin: 0;
+  color: var(--site-muted);
+}
+
+.page__content .housing-stress__rent-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.page__content .housing-rent {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--site-border);
+  border-radius: 8px;
+  background: var(--site-surface-raised);
+}
+
+.page__content .housing-rent--split {
+  border-color: var(--site-link);
+  background: rgba(140, 210, 213, 0.08);
+}
+
+.page__content .housing-rent span,
+.page__content .housing-rent strong {
+  display: block;
+}
+
+.page__content .housing-rent span {
+  margin-bottom: 0.2rem;
+  color: var(--site-muted);
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+.page__content .housing-rent strong {
+  color: var(--site-text);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.page__content .housing-stress__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0 0 1rem;
+  color: var(--site-muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.page__content .housing-stress__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.page__content .housing-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+}
+
+.page__content .housing-dot--good {
+  background: #38bdf8;
+}
+
+.page__content .housing-dot--bad {
+  background: #fb7185;
+}
+
+.page__content .housing-stress__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.page__content .housing-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--site-border);
+  border-radius: 8px;
+  background: var(--site-surface-raised);
+}
+
+.page__content .housing-card--warning {
+  border-color: #fb7185;
+}
+
+.page__content .housing-card h4 {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+}
+
+.page__content .housing-card__summary {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+  color: var(--site-muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.page__content .housing-card__summary span {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.page__content .housing-card__summary strong {
+  color: var(--site-text);
+  white-space: nowrap;
+}
+
+.page__content .housing-card__rows {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.page__content .housing-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-rows: auto auto;
+  column-gap: 0.8rem;
+  row-gap: 0.12rem;
+  align-items: center;
+  min-height: 3.85rem;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid var(--site-border);
+  border-radius: 6px;
+  background: var(--site-surface-soft);
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.page__content .housing-row span:first-child {
+  grid-column: 1;
+  grid-row: 1;
+  color: var(--site-text);
+  font-weight: 700;
+}
+
+.page__content .housing-row span:nth-child(2) {
+  grid-column: 1;
+  grid-row: 2;
+  color: var(--site-muted);
+}
+
+.page__content .housing-row strong {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--site-text);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.page__content .housing-row--good {
+  border-color: rgba(56, 189, 248, 0.55);
+}
+
+.page__content .housing-row--good strong {
+  color: #7dd3fc;
+}
+
+.page__content .housing-row--bad {
+  border-color: rgba(251, 113, 133, 0.58);
+}
+
+.page__content .housing-row--bad strong {
+  color: #fda4af;
+}
+
+.page__content .housing-card p {
+  margin: 0.8rem 0 0;
+  color: var(--site-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+html[data-theme="light"] .page__content .housing-rent--split {
+  background: rgba(15, 107, 120, 0.08);
+}
+
+html[data-theme="light"] .page__content .housing-dot--good {
+  background: #0f6b78;
+}
+
+html[data-theme="light"] .page__content .housing-dot--bad {
+  background: #be123c;
+}
+
+html[data-theme="light"] .page__content .housing-row--good {
+  border-color: rgba(15, 107, 120, 0.45);
+}
+
+html[data-theme="light"] .page__content .housing-row--good strong {
+  color: #0f6b78;
+}
+
+html[data-theme="light"] .page__content .housing-row--bad {
+  border-color: rgba(190, 18, 60, 0.42);
+}
+
+html[data-theme="light"] .page__content .housing-row--bad strong {
+  color: #be123c;
+}
+
+.page__content .ratio-model,
+.page__content .money-levers,
+.page__content .priority-path,
+.page__content .scenario-paths {
+  width: min(980px, calc(100vw - 2rem));
+  margin: 2rem 0 2.25rem 50%;
+  transform: translateX(-50%);
+  font-variant-numeric: tabular-nums;
+}
+
+.page__content .ratio-model__header,
+.page__content .money-levers__header,
+.page__content .scenario-paths__header {
+  margin-bottom: 1rem;
+}
+
+.page__content .ratio-model__header h3,
+.page__content .money-levers__header h3,
+.page__content .scenario-paths__header h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+}
+
+.page__content .ratio-model__header p,
+.page__content .money-levers__header p,
+.page__content .scenario-paths__header p {
+  max-width: 74ch;
+  margin: 0;
+  color: var(--site-muted);
+}
+
+.page__content .ratio-ladder {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.page__content .ratio-step,
+.page__content .ratio-formula,
+.page__content .money-lever,
+.page__content .priority-path,
+.page__content .scenario-card {
+  min-width: 0;
+  border: 1px solid var(--site-border);
+  border-radius: 8px;
+  background: var(--site-surface-raised);
+}
+
+.page__content .ratio-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.85rem;
+}
+
+.page__content .ratio-step strong {
+  color: var(--site-text);
+  font-size: 1.12rem;
+  line-height: 1.1;
+}
+
+.page__content .ratio-step span {
+  color: var(--site-link);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.page__content .ratio-step small {
+  color: var(--site-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.page__content .ratio-step--maintenance {
+  border-color: var(--site-link);
+  background: rgba(140, 210, 213, 0.08);
+}
+
+.page__content .ratio-formulas,
+.page__content .money-levers__grid,
+.page__content .scenario-paths__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.page__content .ratio-formulas {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.page__content .ratio-formula {
+  padding: 0.85rem;
+}
+
+.page__content .ratio-formula span,
+.page__content .money-lever span,
+.page__content .scenario-card__label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--site-muted);
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+.page__content .ratio-formula strong,
+.page__content .money-lever strong {
+  display: block;
+  color: var(--site-text);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.page__content .money-levers__grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.page__content .money-lever,
+.page__content .scenario-card {
+  padding: 1rem;
+}
+
+.page__content .priority-path {
+  padding: 1rem;
+}
+
+.page__content .priority-path__intro {
+  max-width: 74ch;
+  margin: 0 0 1rem;
+  color: var(--site-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.page__content .priority-path__steps {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page__content .priority-path__steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr);
+  gap: 0.8rem;
+  max-width: none;
+  margin: 0;
+  padding: 0.35rem 0 0.95rem;
+}
+
+.page__content .priority-path__steps li::before {
+  content: "";
+  position: absolute;
+  top: 2.75rem;
+  bottom: 0.2rem;
+  left: 1.04rem;
+  width: 2px;
+  background: var(--site-border);
+}
+
+.page__content .priority-path__steps li:last-child {
+  padding-bottom: 0.35rem;
+}
+
+.page__content .priority-path__steps li:last-child::before {
+  content: none;
+}
+
+.page__content .priority-path__number {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 2px solid var(--site-link);
+  border-radius: 999px;
+  color: var(--site-text);
+  background: var(--site-surface-raised);
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.page__content .priority-path__steps strong {
+  display: block;
+  color: var(--site-text);
+  font-size: 0.96rem;
+  line-height: 1.25;
+}
+
+.page__content .priority-path__time {
+  display: inline-block;
+  margin-bottom: 0.2rem;
+  padding: 0.12rem 0.4rem;
+  border: 1px solid var(--site-border);
+  border-radius: 999px;
+  color: var(--site-muted);
+  background: var(--site-surface-soft);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.page__content .priority-path__steps p {
+  max-width: 74ch;
+  margin: 0.25rem 0 0;
+  color: var(--site-muted);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.page__content .money-lever p,
+.page__content .scenario-card p {
+  margin: 0.7rem 0 0;
+  color: var(--site-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.page__content .scenario-paths__grid {
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+.page__content .scenario-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.page__content .scenario-card--warning {
+  border-color: #fb7185;
+}
+
+.page__content .scenario-card h4 {
+  margin: 0 0 0.2rem;
+  font-size: 1.08rem;
+}
+
+.page__content .scenario-card__timeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+}
+
+.page__content .scenario-card__timeline > div {
+  display: grid;
+  grid-template-rows: auto auto minmax(5.4rem, 1fr) auto;
+  gap: 0.2rem 0.7rem;
+  align-content: start;
+  padding: 0.65rem;
+  border: 1px solid var(--site-border);
+  border-radius: 6px;
+  background: var(--site-surface-soft);
+}
+
+.page__content .scenario-card__timeline strong {
+  color: var(--site-text);
+  font-size: 0.84rem;
+  line-height: 1.25;
+}
+
+.page__content .scenario-card__timeline span {
+  color: var(--site-link);
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.page__content .scenario-card__timeline p {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.page__content .scenario-card__details {
+  display: grid;
+  align-self: start;
+  gap: 0.22rem;
+  margin: 0;
+}
+
+.page__content .scenario-card__details > div {
+  display: grid;
+  grid-template-columns: minmax(4.4rem, 5.2rem) minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: baseline;
+  min-height: 1rem;
+}
+
+.page__content .scenario-card__details dt,
+.page__content .scenario-card__details dd {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.page__content .scenario-card__details dt {
+  grid-column: 2;
+  color: var(--site-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page__content .scenario-card__details dd {
+  grid-column: 1;
+  grid-row: 1;
+  color: var(--site-text);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.page__content .scenario-card__takeaway {
+  margin-top: auto;
+  padding-top: 0.8rem;
+}
+
+html[data-theme="light"] .page__content .ratio-step--maintenance {
+  background: rgba(15, 107, 120, 0.08);
 }
 
 .archive__item {
@@ -478,10 +1070,81 @@ body.reader-mode .page__content h3 {
   max-width: 70ch;
 }
 
+@media (max-width: 900px) {
+  .page__content .housing-stress__rent-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page__content .housing-stress__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .page__content .ratio-ladder,
+  .page__content .ratio-formulas,
+  .page__content .money-levers__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page__content .scenario-card__timeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 640px) {
   .page__content {
     font-size: 0.98rem;
     line-height: 1.68;
+  }
+
+  .page__content .housing-stress {
+    width: 100%;
+    margin: 1.5rem 0 1.75rem;
+    transform: none;
+  }
+
+  .page__content .ratio-model,
+  .page__content .money-levers,
+  .page__content .priority-path,
+  .page__content .scenario-paths {
+    width: 100%;
+    margin: 1.5rem 0 1.75rem;
+    transform: none;
+  }
+
+  .page__content .housing-stress__rent-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page__content .ratio-ladder,
+  .page__content .ratio-formulas,
+  .page__content .money-levers__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page__content .scenario-card__timeline {
+    grid-template-columns: 1fr;
+  }
+
+  .page__content .housing-card {
+    padding: 0.85rem;
+  }
+
+  .page__content .housing-card__summary span {
+    grid-template-columns: 1fr;
+  }
+
+  .page__content .housing-card__summary span {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .page__content .housing-row {
+    grid-template-columns: minmax(0, 1fr) max-content;
+    min-height: 3.6rem;
+  }
+
+  .page__content .housing-row strong {
+    text-align: right;
   }
 
   .project-grid {

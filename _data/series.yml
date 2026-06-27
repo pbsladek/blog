@@ -5,3 +5,16 @@ vllm-inference:
       url: /2026/05/21/vllm-inference-101/
     - title: Running vLLM in Kubernetes
       url: /2026/06/14/vllm-kubernetes/
+classic-savings-rates:
+  title: Classic Savings Rates
+  posts:
+    - title: A Real Savings Plan Should Change Over Time. 50/30/20 Does Not.
+      url: /2026/05/31/classic-savings-rates/
+    - title: Inflation Keeps Moving the Emergency Fund Target
+      url: /2026/06/01/inflation-emergency-fund-target/
+    - title: Renting Is Not Wasting Money
+      url: /2026/06/02/renting-is-not-wasting-money/
+    - title: Relationships Are Part of the Financial Plan
+      url: /2026/06/03/relationships-financial-plan/
+    - title: Golden Handcuffs Are Usually Lifestyle Inflation
+      url: /2026/06/04/golden-handcuffs-are-usually-lifestyle-inflation/
