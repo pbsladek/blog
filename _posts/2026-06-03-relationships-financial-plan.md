@@ -16,7 +16,7 @@ Two people with different incomes can still build a strong household if they sha
 
 {% include series-nav.html %}
 
-This is issue-spotting, not legal, tax, financial, or safety advice. Marriage, debt, property division, support, custody, tax filing, and prenup enforceability vary by state and by fact pattern. Abuse, coercion, addiction, hidden assets, and safety risk change the playbook completely. If negotiation is not safe or honest, use qualified local counsel and trained support; the National Domestic Violence Hotline has a plain-language guide to [financial abuse](https://www.thehotline.org/resources/financialabuse/).
+This is issue-spotting, not legal, tax, financial, or safety advice. Marriage, debt, property division, support, custody, tax filing, and prenup rules vary by state and by the facts. Abuse, coercion, addiction, hidden assets, and safety risk change everything. If negotiation is not safe or honest, use qualified local counsel and trained support; the National Domestic Violence Hotline has a plain-language guide to [financial abuse](https://www.thehotline.org/resources/financialabuse/).
 
 Two people with similar incomes can become financially dangerous to each other if one treats every raise as spending permission and the other is trying to build safety.
 
@@ -62,29 +62,29 @@ Marriage is not only a romantic commitment in the eyes of the state. It is also 
 
 Yes, there can be tax benefits. The IRS says that on a joint return, couples report combined income and deductions and that [filing jointly lowers taxes for many couples](https://www.irs.gov/individuals/filing-taxes-after-divorce-or-separation). It is unfortunate for single people that married couples can get that preference, but it makes sense that the state favors household formation.
 
-Just do not confuse the incentive with protection. It is unlikely the state will get you a clean, fair shake if the relationship detonates. Whatever tax break you got is not going to make up for a brutal divorce. It is negligible compared with legal fees, split assets, duplicated housing costs, custody fights, and years of financial cleanup.
+Just do not confuse the incentive with protection. It is unlikely the state will get you a clean, fair shake if the relationship blows up. Whatever tax break you got is not going to make up for a brutal divorce. It is tiny compared with legal fees, split assets, duplicated housing costs, custody fights, and years of financial cleanup.
 
 The same system can also create shared liability: the IRS says that when spouses file jointly, [both are responsible for the tax, interest, and penalties](https://www.irs.gov/individuals/innocent-spouse-relief), even after divorce, even if a divorce decree assigns the tax bill to one spouse, and even if one spouse earned all the income. Innocent spouse relief exists, but it is fact-dependent and not something to casually rely on after the damage is done.
 
-Debt is the same kind of reality check. "Their debt is your debt" is not literally true in every state or every fact pattern, but marriage can absolutely turn one person's financial choices into a household problem.
+Debt is the same kind of reality check. "Their debt is your debt" is not literally true in every state or every situation, but marriage can absolutely turn one person's financial choices into a household problem.
 
 California's court self-help guide says divorce includes dividing property and debts, that property includes bank accounts, pensions, 401(k)s, stocks, credit card debt, and loans, and that until there is a court order, [property or debt from the marriage still belongs to both spouses](https://selfhelp.courts.ca.gov/divorce/property-debts). It also says debt taken on while married is generally community property, and that a spouse may have debt only in their own name that still usually belongs to both spouses.
 
-California is a community-property state, meaning the law generally treats many assets and debts acquired during marriage as belonging to the marital community. Other states use equitable distribution, where a court divides marital property in a way it considers fair under state law, which may not mean equal. Creditor liability can also differ from divorce allocation. The lesson travels even when the statute changes: marriage changes the legal boundary around money.
+California is a community-property state. In plain English, that means many assets and debts acquired during marriage are treated as belonging to the marriage. Other states use a different system, where a court divides property from the marriage in a way it considers fair under state law. Fair may not mean equal. Creditors can also have different rights than the divorce order says between the spouses. The lesson travels even when the exact law changes: marriage changes the legal boundary around money.
 
-## Divorce is not an edge case.
+## Divorce is not rare.
 
-Divorce is not some edge case that only happens to other people. CDC/NCHS reported [672,502 divorces and annulments in 2023](https://www.cdc.gov/nchs/data/dvs/marriage-divorce/national-marriage-divorce-rates-00-23.pdf), a rate of 2.4 per 1,000 people in the reporting area. That reporting area does not include every state, and the rate is lower than it was in 2000, but the count is still massive.
+Divorce is not some rare thing that only happens to other people. CDC/NCHS reported [672,502 divorces and annulments in 2023](https://www.cdc.gov/nchs/data/dvs/marriage-divorce/national-marriage-divorce-rates-00-23.pdf), a rate of 2.4 per 1,000 people in the reporting area. That reporting area does not include every state, and the rate is lower than it was in 2000, but the count is still massive.
 
-BLS, using the National Longitudinal Survey of Youth 1979, found that [about 42 percent of marriages from ages 15 to 46 ended in divorce by age 46](https://www.bls.gov/opub/mlr/2013/article/marriage-and-divorce-patterns-by-gender-race-and-educational-attainment.htm). That cohort was born from 1957 to 1964, so it is not a clean forecast for every couple today. It is still a warning against building a financial life as if divorce risk rounds to zero.
+BLS, using the National Longitudinal Survey of Youth 1979, found that [about 42 percent of marriages from ages 15 to 46 ended in divorce by age 46](https://www.bls.gov/opub/mlr/2013/article/marriage-and-divorce-patterns-by-gender-race-and-educational-attainment.htm). That group was born from 1957 to 1964, so it is not a clean forecast for every couple today. It is still a warning against building a financial life as if divorce risk is zero.
 
 This is not just a straight-couple issue. Census tracks [same-sex couple households](https://www.census.gov/topics/families/same-sex-couples.html), and the IRS says that for federal tax purposes, [same-sex marriages are treated the same as opposite-sex marriages](https://www.irs.gov/publications/p555). That equality is good. It also means the same contract logic applies. LGBT couples should not treat prenups, debt disclosure, retirement accounts, house purchases, or tax filing status as someone else's problem.
 
-Both sexes can lose in divorce, just often in different ways. Women can get hit by income loss, childcare load, interrupted careers, legal costs, and the difficulty of rebuilding savings. Men can get hit by asset division, support obligations, legal costs, housing resets, custody fights, and retirement splits. Same-sex couples can face the same financial breakup math without the old gender script.
+Both sexes can lose in divorce, just often in different ways. Women can get hit by income loss, childcare load, paused careers, legal costs, and the difficulty of rebuilding savings. Men can get hit by asset division, support obligations, legal costs, housing resets, custody fights, and retirement splits. Same-sex couples can face the same financial breakup math without the old gender script.
 
 Nobody wins because the spreadsheet becomes two households, two rents or mortgages, two legal teams, split retirement accounts, new tax filing status, and years of decisions that may now be argued in public records.
 
-Unpaid labor belongs in the conversation too. Someone staying home with children, moving for a spouse's career, reducing hours, or carrying elder care may be doing real household work while losing income, retirement contributions, promotions, and bargaining power. A financial plan that ignores career interruption is not romantic. It is incomplete.
+Unpaid labor belongs in the conversation too. Someone staying home with children, moving for a spouse's career, reducing hours, or carrying elder care may be doing real household work while losing income, retirement contributions, promotions, and power in the job market. A financial plan that ignores career pauses is not romantic. It is incomplete.
 
 So do the boring paperwork. Beneficiaries, wills, powers of attorney, insurance, account access, emergency contacts, and estate planning are part of the relationship plan. They matter even more when there are children, prior children, business interests, large assets, or family obligations.
 
@@ -94,16 +94,16 @@ Consider a prenup, especially when there are assets, debt, business interests, e
 
 Prenups are not red flags. Bad prenups are red flags. Surprise prenups are red flags. "Trust me, we do not need to talk about money" is a red flag.
 
-There is not a clean federal dataset that tells us exactly how many couples have prenups, so do not treat prenup prevalence statistics like hard government data. Treat the law as the useful data. [California's Family Code](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=FAM&sectionNum=1615.) says a premarital agreement can be unenforceable if it was not voluntary, lacked fair disclosure, or was unconscionable, and it points to independent legal counsel, written disclosure, and waiting periods as part of the enforceability analysis.
+There is not a clean federal dataset that tells us exactly how many couples have prenups, so do not treat prenup popularity stats like hard government data. Treat the law as the useful data. [California's Family Code](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=FAM&sectionNum=1615.) says a premarital agreement can fail if it was not voluntary, lacked fair disclosure, or was extremely unfair. It also points to independent legal counsel, written disclosure, and waiting periods as part of whether the agreement holds up.
 
 Each person should have their own lawyer, full financial disclosure, and enough time to do it properly. The point is not planning to fail. The point is refusing to enter a major contract with your eyes closed.
 
 And if the marriage does end, do everything reasonable to stay out of a lawyer-driven war. Use mediation if both people can negotiate safely and honestly. Use lawyers for advice, document review, and real protection; do not use them as paid weapons for every unresolved emotion.
 
-Mediation is not appropriate for every situation. Abuse, coercion, hidden assets, addiction, serious custody risk, intimidation, or a spouse who refuses to disclose reality can make court or direct legal protection unavoidable. But when two functioning adults can be adults, an amicable settlement is usually the only path that does not light money on fire.
+Mediation is not right for every situation. Abuse, coercion, hidden assets, addiction, serious custody risk, intimidation, or a spouse who refuses to tell the truth can make court or direct legal protection unavoidable. But when two functioning adults can be adults, a peaceful settlement is usually the only path that does not light money on fire.
 
 Every dollar burned on avoidable legal combat is a dollar that could have gone to rebuilding two households, protecting retirement, or supporting the kids. If children are involved, that should matter more than winning the last argument.
 
-Before combining finances, buying a house, having kids, or making one person dependent on the other person's income, the conversation has to get specific. How much debt exists? What is the emergency target? What savings rate are we aiming for? What happens if one person loses a job? What expenses are non-negotiable? What kind of lifestyle are we actually choosing?
+Before combining finances, buying a house, having kids, or making one person dependent on the other person's income, the conversation has to get specific. How much debt exists? What is the emergency target? What savings rate are we aiming for? What happens if one person loses a job? What expenses are must-pay expenses? What kind of lifestyle are we actually choosing?
 
-Love does not cancel arithmetic. A relationship can be the strongest financial advantage in someone's life, or it can be the place where years of progress disappear. Shared goals, basic financial literacy, and honest numbers matter.
+Love does not cancel math. A relationship can be the strongest financial advantage in someone's life, or it can be the place where years of progress disappear. Shared goals, basic financial literacy, and honest numbers matter.
